@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="StationEntities">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="MarsStation">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="DS Templates">
+      <UniqueIdentifier>{47b1fdc3-ea16-4013-b98d-764678428e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StationEntities\Rovers">
+      <UniqueIdentifier>{2b338291-10f3-4c54-a503-ed50f4d714f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StationEntities\Requests">
+      <UniqueIdentifier>{78336d4e-7692-40f5-8fa4-06e51eb9687b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StationEntities\Missions">
+      <UniqueIdentifier>{8d1863bc-7072-4f82-8c21-843291a339be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DS Templates\Queue">
+      <UniqueIdentifier>{e63ef2d9-5ed5-42fa-b384-7b741a0a197b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DS Templates\PriorityQueue">
+      <UniqueIdentifier>{a262f4f9-6242-4db2-be25-e128bd73979a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DS Templates\Stack">
+      <UniqueIdentifier>{b6fc3968-205e-46ee-a600-b0a18c251b8e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="UI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MarsStation.cpp">
+      <Filter>MarsStation</Filter>
+    </ClCompile>
+    <ClCompile Include="Rovers.cpp">
+      <Filter>StationEntities\Rovers</Filter>
+    </ClCompile>
+    <ClCompile Include="NewRequest.cpp">
+      <Filter>StationEntities\Requests</Filter>
+    </ClCompile>
+    <ClCompile Include="Missions.cpp">
+      <Filter>StationEntities\Missions</Filter>
+    </ClCompile>
+    <ClCompile Include="AbortedRequest.cpp">
+      <Filter>StationEntities\Requests</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Rovers.h">
+      <Filter>StationEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="AbortedRequest.h">
+      <Filter>StationEntities\Requests</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayStack.h">
+      <Filter>DS Templates\Stack</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedQueue.h">
+      <Filter>DS Templates\Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="MarsStation.h">
+      <Filter>MarsStation</Filter>
+    </ClInclude>
+    <ClInclude Include="Missions.h">
+      <Filter>StationEntities\Missions</Filter>
+    </ClInclude>
+    <ClInclude Include="NewRequest.h">
+      <Filter>StationEntities\Requests</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>DS Templates\Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="OMpriQueue.h">
+      <Filter>DS Templates\PriorityQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="priNode.h">
+      <Filter>DS Templates\PriorityQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="priQueue.h">
+      <Filter>DS Templates\PriorityQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="QueueADT.h">
+      <Filter>DS Templates\Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RNMQueue.h">
+      <Filter>DS Templates\Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="Requests.h">
+      <Filter>StationEntities\Requests</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="StackADT.h">
+      <Filter>DS Templates\Stack</Filter>
+    </ClInclude>
+    <ClInclude Include="DEFS.h" />
+  </ItemGroup>
+</Project>
