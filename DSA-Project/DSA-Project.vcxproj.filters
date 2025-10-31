@@ -57,9 +57,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Rovers.h">
-      <Filter>StationEntities</Filter>
-    </ClInclude>
     <ClInclude Include="AbortedRequest.h">
       <Filter>StationEntities\Requests</Filter>
     </ClInclude>
@@ -106,5 +103,8 @@
       <Filter>DS Templates\Stack</Filter>
     </ClInclude>
     <ClInclude Include="DEFS.h" />
+    <ClInclude Include="Rovers.h">
+      <Filter>StationEntities\Rovers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -46,4 +46,4 @@ public:
 
     bool isRoverDamaged() const;
 };
-ostream& operator<<(ostream& os, const Rovers& rover);
+ostream& operator<<(ostream& os, const Rovers*& rover);

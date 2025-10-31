@@ -8,6 +8,10 @@
 #include "Rovers.h"
 #include "RNMQueue.h" 
 #include "OMpriQueue.h" 
+#include "DEFS.h"
+#include "AbortedRequest.h"
+#include "NewRequest.h"
+
 
 class UI;
 class MarsStation
@@ -22,7 +26,7 @@ private:
     // 1. Pending Requests (Queue because input file is pre-sorted)
     LinkedQueue<Requests*> pendingRequests;
 
-    // 2. Waiting (Ready) Missions
+    // 2. Waiting (Ready) MissionsS
     LinkedQueue<Missions*> readyPolarMissions;
     ReadyNormalMissionsQueue readyNormalMissions;
     LinkedQueue<Missions*> readyDiggingMissions;
@@ -45,7 +49,7 @@ private:
     LinkedQueue<Missions*> abortedMissions;
 
     // --- Private Helper Functions ---
-    void loadFromFile(const std::string& filename);
+    void loadFromFile(const string& filename);
     void processPendingRequests();
     void processCompletions();
     void assignMissions();

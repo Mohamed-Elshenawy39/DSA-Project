@@ -47,5 +47,5 @@ public:
 
 
 };
-ostream& operator<<(ostream& os, const Missions* mission);
+ostream& operator<<(ostream& os, const Missions* & mission);
 
