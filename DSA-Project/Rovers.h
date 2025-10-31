@@ -14,11 +14,6 @@ private:
     int maxMissionsBeforeCheckup;
     int missionsCompleted; // Counter since last checkup
 
-    // --- BONUS ---
-    // A state to track if the rover is damaged (for Rescue Mission bonus)
-    bool isDamaged;
-
-
 public:
     // Constructor now takes 'M' (maxMissions)
     Rovers(int id, RoverType type, int speed, int cdu, int maxMissions);
@@ -39,11 +34,5 @@ public:
     void resetMissionsCompleted();
 
 
-    // --- BONUS ---
-
-    // A function to handle the rover failing (for Rescue Mission bonus)
-    void setDamagedStatus(bool status);
-
-    bool isRoverDamaged() const;
 };
-ostream& operator<<(ostream& os, const Rovers& rover);
+ostream& operator<<(ostream& os, const Rovers* rover);
