@@ -216,7 +216,7 @@ template <typename T>
 void LinkedQueue<T>::PrintQueue() {
 	Node<T>* current = frontPtr;
 	while (current) {
-		cout << current->getItem() << " ";
+		cout << current->getItem();
 		current = current->getNext();
 	}
 	cout << endl;

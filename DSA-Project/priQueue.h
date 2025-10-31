@@ -71,7 +71,7 @@ public:
 		while (current) {
 			int p = current ->getPri();
 			T item = current->getItem(p);
-			cout << "Item: " << item << ", Priority: " << p << endl;
+			cout << item << " Priority: " << p << endl;
 			current = current->getNext();
 		}
 	}

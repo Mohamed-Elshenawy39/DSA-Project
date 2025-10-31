@@ -6,6 +6,11 @@
 	{
 	}
 
+    int Rovers::getID() const
+    {
+        return id;
+    }
+
     RoverType Rovers::getType() const { return type; }
     int Rovers::getSpeed() const { return speed; }
     int Rovers::getCheckupDuration() const { return checkupDuration; }

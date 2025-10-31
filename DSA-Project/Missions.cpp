@@ -24,3 +24,4 @@ void Missions:: setCompletionDay(int day) { completionDay = day; }
 void Missions:: setWaitingDays(int wd) { waitingDays = wd; }
 void Missions:: setTdays(int td) { Tdays = td; }
 void Missions:: setOneWayTravelTime(int tt) { oneWayTravelTime = tt; }
+

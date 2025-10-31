@@ -111,3 +111,73 @@ void MarsStation::addMission(Missions* newMission)
         readyNormalMissions.enqueue(newMission);
     }
 }
+
+void MarsStation::abortMission(int missionID)
+{
+}
+
+LinkedQueue<Missions*>& MarsStation::getReadyPolarMissions() 
+{
+	return readyPolarMissions;
+}
+
+ReadyNormalMissionsQueue& MarsStation::getReadyNormalMissions()
+{
+	return readyNormalMissions;
+}
+LinkedQueue<Missions*>& MarsStation::getReadyDiggingMissions()
+{
+	return readyDiggingMissions;
+}
+
+OutMissionsPriQueue& MarsStation::getOutMissions()
+{
+	return outMissions;
+}
+
+priQueue<Missions*>& MarsStation::getExecMissions()
+{
+	return execMissions;
+}
+
+priQueue<Missions*>& MarsStation::getBackMissions()
+{
+	return backMissions;
+}
+
+LinkedQueue<Rovers*>& MarsStation::getAvailablePolarRovers()
+{
+	return availablePolarRovers;
+}
+
+LinkedQueue<Rovers*>& MarsStation::getAvailableNormalRovers()
+{
+	return availableNormalRovers;
+}
+
+LinkedQueue<Rovers*>& MarsStation::getAvailableDiggingRovers()
+{
+	return availableDiggingRovers;
+}
+
+priQueue<Rovers*>& MarsStation::getInCheckupRovers()
+{
+	return inCheckupRovers;
+}
+
+ArrayStack<Missions*>& MarsStation::getCompletedMissions()
+{
+	return completedMissions;
+}
+
+LinkedQueue<Missions*>& MarsStation::getAbortedMissions()
+{
+    return abortedMissions;
+}
+
+LinkedQueue<Requests*> MarsStation::getpendingRequests()
+{
+    return pendingRequests;
+}
+
+

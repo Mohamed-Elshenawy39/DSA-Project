@@ -47,5 +47,30 @@ public:
 
 
 };
-ostream& operator<<(ostream& os, const Missions* & mission);
+// Operator Overload for Printing 
+inline ostream& operator<<(ostream& os, const Missions* mission)
+{
+    string typeStr;
 
+    // Determine mission type 
+    if (mission->getType() == MISSION_POLAR)
+        typeStr = "Polar";
+    else if (mission->getType() == MISSION_NORMAL)
+        typeStr = "Normal";
+    else if (mission->getType() == MISSION_DIGGING)
+        typeStr = "Digging";
+    else
+        typeStr = "Unknown";
+
+    os << "[Mission ID: " << mission->getID()
+        << ", Type: " << typeStr
+        << ", Ready Day: " << mission->getFormulationDay()
+        << ", Target: " << mission->getTargetLocation() << " km"
+        << ", Duration: " << mission->getMissionDuration() << " days";
+
+    if (mission->getAssignedRover() != nullptr)
+        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
+
+    os << "]\n";
+    return os;
+}

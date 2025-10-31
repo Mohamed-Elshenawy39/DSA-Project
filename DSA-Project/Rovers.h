@@ -46,4 +46,22 @@ public:
 
     bool isRoverDamaged() const;
 };
-ostream& operator<<(ostream& os, const Rovers*& rover);
+// Operator Overload
+inline ostream& operator<<(ostream& os, const Rovers* rover)
+{   
+    string typeStr;
+
+    if (rover->getType() == ROVER_NORMAL)
+        typeStr = "Normal";
+    else if (rover->getType() == ROVER_POLAR)
+        typeStr = "Polar";
+    else
+        typeStr = "Digging";
+
+    os << "[Rover " << rover->getID()
+        << " | Type: " << typeStr
+        << " | Speed: " << rover->getSpeed()
+        << " | Checkup Duration: " << rover->getCheckupDuration()
+        << "]\n";
+    return os;
+}
