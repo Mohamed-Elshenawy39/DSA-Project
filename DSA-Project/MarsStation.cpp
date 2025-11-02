@@ -97,7 +97,7 @@ void MarsStation::runSimulation()
 {
 	loadFromFile("Input.txt");
     processPendingRequests();
-    // shablang bnekeak w 3la ktfy kamanga 
+    // shablanga bnekeak w 3la ktfy kamanga 
     // aywa ana zobry bta3m al managa 
     //  oh oh 
 }
