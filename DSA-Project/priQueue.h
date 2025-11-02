@@ -10,10 +10,9 @@ class priQueue
     priNode<T>* head;
     int count;
 public:
-    priQueue() : head(nullptr) {}
+    priQueue() : head(nullptr), count(0) {}
 
     ~priQueue() {
-		count = 0;
         T tmp;
         int p;
         while (dequeue(tmp,p));
@@ -54,6 +53,7 @@ public:
         delete temp;
 		count--;
         return true;
+
     }
 
     bool peek(T& topEntry, int& pri) {
@@ -72,7 +72,7 @@ public:
 		while (current) {
 			int p = current ->getPri();
 			T item = current->getItem(p);
-			cout << "Item: " << item << ", Priority: " << p << endl;
+			cout << item << " Priority: " << p << endl;
 			current = current->getNext();
 		}
 	}

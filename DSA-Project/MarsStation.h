@@ -8,6 +8,10 @@
 #include "Rovers.h"
 #include "RNMQueue.h" 
 #include "OMpriQueue.h" 
+#include "DEFS.h"
+#include "AbortedRequest.h"
+#include "NewRequest.h"
+
 
 class UI;
 class MarsStation
@@ -22,7 +26,7 @@ private:
     // 1. Pending Requests (Queue because input file is pre-sorted)
     LinkedQueue<Requests*> pendingRequests;
 
-    // 2. Waiting (Ready) Missions
+    // 2. Waiting (Ready) MissionsS
     LinkedQueue<Missions*> readyPolarMissions;
     ReadyNormalMissionsQueue readyNormalMissions;
     LinkedQueue<Missions*> readyDiggingMissions;
@@ -45,7 +49,7 @@ private:
     LinkedQueue<Missions*> abortedMissions;
 
     // --- Private Helper Functions ---
-    void loadFromFile(const std::string& filename);
+    void loadFromFile(const string& filename);
     void processPendingRequests();
     void processCompletions();
     void assignMissions();
@@ -64,20 +68,21 @@ public:
     void abortMission(int missionID);
 
     // --- Getters for UI Printing ---
-     LinkedQueue<Missions*>& getReadyPolarMissions() const;
-     ReadyNormalMissionsQueue& getReadyNormalMissions() const;
-     LinkedQueue<Missions*>& getReadyDiggingMissions() const;
+     LinkedQueue<Missions*>& getReadyPolarMissions();
+     ReadyNormalMissionsQueue& getReadyNormalMissions();
+     LinkedQueue<Missions*>& getReadyDiggingMissions();
 
-     OutMissionsPriQueue& getOutMissions() const; 
-     priQueue<Missions*>& getExecMissions() const;
-     priQueue<Missions*>& getBackMissions() const;
+     OutMissionsPriQueue& getOutMissions(); 
+     priQueue<Missions*>& getExecMissions();
+     priQueue<Missions*>& getBackMissions();
 
-     LinkedQueue<Rovers*>& getAvailablePolarRovers() const;
-     LinkedQueue<Rovers*>& getAvailableNormalRovers() const;
-     LinkedQueue<Rovers*>& getAvailableDiggingRovers() const;
+     LinkedQueue<Rovers*>& getAvailablePolarRovers();
+     LinkedQueue<Rovers*>& getAvailableNormalRovers();
+     LinkedQueue<Rovers*>& getAvailableDiggingRovers();
 
-     priQueue<Rovers*>& getInCheckupRovers() const;
-     ArrayStack<Missions*>& getCompletedMissions() const;
-     LinkedQueue<Missions*>& getAbortedMissions() const;
+     priQueue<Rovers*>& getInCheckupRovers();
+     ArrayStack<Missions*>& getCompletedMissions();
+     LinkedQueue<Missions*>& getAbortedMissions();
+     LinkedQueue<Requests*> getpendingRequests();
 };
 

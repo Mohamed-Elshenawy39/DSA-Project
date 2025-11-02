@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include "Missions.h"
 using namespace std;
 class MarsStation; 
 class Requests

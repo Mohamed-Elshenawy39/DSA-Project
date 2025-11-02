@@ -1,71 +1,41 @@
 #include "Rovers.h"
-#include<iostream>
-using namespace std;
 
-// Constructor 
-Rovers::Rovers(int _id, RoverType _type, int _speed, int _cdu, int _maxMissions)
-{
-    id =_id;
-    type = _type;
-    speed = _speed;
-    checkupDuration = _cdu;
-    maxMissionsBeforeCheckup = _maxMissions;
-    missionsCompleted = 0;
-}
+    Rovers::Rovers(int id, RoverType type, int speed, int cdu, int missionsBeforeCheckup)
+    : id(id), type(type), speed(speed), checkupDuration(cdu),
+		maxMissionsBeforeCheckup(missionsBeforeCheckup), missionsCompleted(0), isDamaged(false)
+	{
+	}
 
-// Getters 
-int Rovers::getID() const
-{
-    return id;
-}
+    int Rovers::getID() const
+    {
+        return id;
+    }
 
-RoverType Rovers::getType() const
-{
-    return type;
-}
+    RoverType Rovers::getType() const { return type; }
+    int Rovers::getSpeed() const { return speed; }
+    int Rovers::getCheckupDuration() const { return checkupDuration; }
 
-int Rovers::getSpeed() const
-{
-    return speed;
-}
+    void Rovers::incrementMissionsCompleted() {
+        missionsCompleted++;
+    }
 
-int Rovers::getCheckupDuration() const
-{
-    return checkupDuration;
-}
+    bool Rovers::needsCheckup() const {
+        if (maxMissionsBeforeCheckup == 0) return false;
+        return missionsCompleted >= maxMissionsBeforeCheckup;
+    }
 
-// Checkup Logic
-void Rovers::incrementMissionsCompleted()
-{
-    missionsCompleted++;
-}
+    void Rovers::resetMissionsCompleted() {
+        missionsCompleted = 0;
+    }
 
-bool Rovers::needsCheckup() const
-{
-    return missionsCompleted >= maxMissionsBeforeCheckup;
-}
 
-void Rovers::resetMissionsCompleted()
-{
-    missionsCompleted = 0;
-}
+    // --- BONUS ---
 
-// Operator Overload
-ostream& operator<<(ostream& os, const Rovers* rover)
-{
-    string typeStr;
+    // A function to handle the rover failing (for Rescue Mission bonus)
+    void Rovers::setDamagedStatus(bool status) {
+        isDamaged = status;
+    }
 
-    if (rover->getType() == ROVER_NORMAL)
-        typeStr = "Normal";
-    else if (rover->getType() == ROVER_POLAR)
-        typeStr = "Polar";
-    else
-        typeStr = "Digging";
-
-    os << "[Rover " << rover->getID()
-        << " | Type: " << typeStr
-        << " | Speed: " << rover->getSpeed()
-        << " | Checkup Duration: " << rover->getCheckupDuration()
-        << "]";
-    return os;
-}
+    bool Rovers::isRoverDamaged() const {
+        return isDamaged;
+    }
