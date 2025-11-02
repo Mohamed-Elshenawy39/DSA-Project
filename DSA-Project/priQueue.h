@@ -53,6 +53,7 @@ public:
         delete temp;
 		count--;
         return true;
+
     }
 
     bool peek(T& topEntry, int& pri) {
