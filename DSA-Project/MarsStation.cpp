@@ -236,7 +236,10 @@ void MarsStation::ExecToBack()
 
 void MarsStation::OutToExec()
 {
-
+    Missions* mission;
+    int pri;
+	outMissions.dequeue(mission, pri);
+	execMissions.enqueue(mission, pri);
 }
 
 void MarsStation::CheckupToAvailable(Rovers* rover)
