@@ -189,8 +189,9 @@ void MarsStation::BackToCompletedMissions()
 {
     Missions* mission;
     int pri;
+    backMissions.dequeue(mission, pri);
     completedMissions.push(mission);
-    backMissions.dequeue(mission,pri);
+  
     Rovers* rover  = mission->getAssignedRover();
 	int randomnumber = (rand() % 100) + 1; // Random number between 1 and 100
     rover->setMissionsDone(randomnumber);
@@ -222,4 +223,37 @@ void MarsStation::AddRoverToAvailable(Rovers* rover)
 		availableDiggingRovers.enqueue(rover);
     }
 }
+
+void MarsStation::ExecToBack()
+{
+    Missions* mission;
+	int pri;
+	execMissions.dequeue(mission, pri);
+    
+    backMissions.enqueue(mission, pri);
+	
+}
+
+void MarsStation::OutToExec()
+{
+
+}
+
+void MarsStation::CheckupToAvailable(Rovers* rover)
+{
+    int randomnumber = (rand() % 100) + 1;
+    if (randomnumber < 70)
+    {
+		AddRoverToAvailable(rover);
+    }
+    return;
+}
+
+void MarsStation::incrementDay()
+{
+	currentDay++;
+}
+
+
+
 
