@@ -11,6 +11,7 @@
 #include "DEFS.h"
 #include "AbortedRequest.h"
 #include "NewRequest.h"
+#include <random>
 
 
 class UI;
@@ -66,6 +67,17 @@ public:
 
     // NEW: Public function to be called by AbortRequest::Operate
     void abortMission(int missionID);
+    
+    //COV 
+    
+	// NEW: Done mission pushed to completed missions
+	void BackToCompletedMissions();
+
+    //NEW: Add rover to checkup queue 
+	void AddRoverToCheckup(Rovers* rover);
+	//NEW: Add rover to its available queue
+	void AddRoverToAvailable(Rovers* rover);
+
 
     // --- Getters for UI Printing ---
      LinkedQueue<Missions*>& getReadyPolarMissions();
