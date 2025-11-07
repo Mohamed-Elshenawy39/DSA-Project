@@ -81,7 +81,6 @@ void MarsStation::loadFromFile(const string& filename)
         }
     }
 
-    // Close the file
     inputFile.close();
 }
 
