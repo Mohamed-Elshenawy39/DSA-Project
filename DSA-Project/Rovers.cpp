@@ -25,12 +25,15 @@
     }
     
 	// Overloaded function with parameter to check on third requirment
+   
+    
+    //cov Logic needs to be rewritten next phase
     bool Rovers::needsCheckup(Rovers*rover) const {
 		int i = rover->missions_done;
         if (i < 20)
         {
            
-        return true
+            return true;
         }
 
 		else return false;

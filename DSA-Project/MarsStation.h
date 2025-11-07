@@ -77,6 +77,23 @@ public:
 	void AddRoverToCheckup(Rovers* rover);
 	//NEW: Add rover to its available queue
 	void AddRoverToAvailable(Rovers* rover);
+	
+	//Add missions from exec to back
+    void ExecToBack();
+
+    //Add missions from out to exec
+	void OutToExec();
+
+	//move rover from checkup to available Logic needs to be rewritten in next phase
+	void CheckupToAvailable(Rovers* rover);
+
+    // Increment Current day
+    void incrementDay(); 
+
+
+
+
+
 
 
     // --- Getters for UI Printing ---
