@@ -13,6 +13,9 @@ private:
     // 'M' value from the input file
     int maxMissionsBeforeCheckup;
     int missionsCompleted; // Counter since last checkup
+	bool isDamaged; // For bonus part
+
+    int missions_done;
 
 public:
     // Constructor now takes 'M' (maxMissions)
@@ -30,10 +33,19 @@ public:
     // Check if the rover needs maintenance
     bool needsCheckup() const;
 
+    bool needsCheckup( Rovers*rover) const;
+
     // Reset counter after checkup is assigned
     void resetMissionsCompleted();
 
+    void setDamagedStatus(bool status);
 
+    bool isRoverDamaged() const;
+
+	// setting missions done
+    void setMissionsDone(int md) {
+        missions_done = md;
+	}
 };
 // Operator Overload
 inline ostream& operator<<(ostream& os, const Rovers* rover)

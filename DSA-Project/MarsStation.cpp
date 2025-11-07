@@ -97,9 +97,7 @@ void MarsStation::runSimulation()
 {
 	loadFromFile("Input.txt");
     processPendingRequests();
-    // shablanga bnekeak w 3la ktfy kamanga 
-    // aywa ana zobry bta3m al managa 
-    //  oh oh 
+    
 }
 
 void MarsStation::addMission(Missions* newMission)
@@ -118,6 +116,8 @@ void MarsStation::addMission(Missions* newMission)
 void MarsStation::abortMission(int missionID)
 {
 }
+
+
 
 LinkedQueue<Missions*>& MarsStation::getReadyPolarMissions() 
 {
@@ -183,4 +183,43 @@ LinkedQueue<Requests*> MarsStation::getpendingRequests()
     return pendingRequests;
 }
 
+// NEW:COV
+
+void MarsStation::BackToCompletedMissions()  
+{
+    Missions* mission;
+    int pri;
+    completedMissions.push(mission);
+    backMissions.dequeue(mission,pri);
+    Rovers* rover  = mission->getAssignedRover();
+	int randomnumber = (rand() % 100) + 1; // Random number between 1 and 100
+    rover->setMissionsDone(randomnumber);
+	bool test=rover->needsCheckup(rover);
+    if (test)
+        AddRoverToCheckup(rover);
+    else
+		AddRoverToAvailable(rover);
+
+
+
+}
+
+void MarsStation::AddRoverToCheckup(Rovers* rover)
+{
+	inCheckupRovers.enqueue(rover, currentDay + rover->getCheckupDuration());
+}
+
+void MarsStation::AddRoverToAvailable(Rovers* rover)
+{
+	RoverType Type=rover->getType();
+    switch (Type) {
+    case ROVER_POLAR:
+        availablePolarRovers.enqueue(rover);
+
+    case ROVER_NORMAL:
+        availableNormalRovers.enqueue(rover);
+	case ROVER_DIGGING:
+		availableDiggingRovers.enqueue(rover);
+    }
+}
 

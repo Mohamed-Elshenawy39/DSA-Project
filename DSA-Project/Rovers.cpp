@@ -23,6 +23,18 @@
         if (maxMissionsBeforeCheckup == 0) return false;
         return missionsCompleted >= maxMissionsBeforeCheckup;
     }
+    
+	// Overloaded function with parameter to check on third requirment
+    bool Rovers::needsCheckup(Rovers*rover) const {
+		int i = rover->missions_done;
+        if (i < 20)
+        {
+           
+        return true
+        }
+
+		else return false;
+    }
 
     void Rovers::resetMissionsCompleted() {
         missionsCompleted = 0;
