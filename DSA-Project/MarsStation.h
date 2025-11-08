@@ -90,6 +90,9 @@ public:
     // Increment Current day
     void incrementDay(); 
 
+    bool ISsimdone() const;
+
+
 
 
 

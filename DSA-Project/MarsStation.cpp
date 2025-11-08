@@ -2,6 +2,7 @@
 #include "MarsStation.h"
 #include <iostream> 
 #include <fstream>
+#include <cmath> 
 using namespace std;
 
 MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0) {
@@ -97,8 +98,52 @@ void MarsStation::runSimulation()
 {
 	loadFromFile("Input.txt");
     processPendingRequests();
-    
+    while (!ISsimdone())
+    {
+        // STEP 1: Process new requests scheduled for today
+        processPendingRequests();
+
+        // STEP 2: Move rover from Checkup to Available
+        // (Your Step 2 logic)
+        // CheckupToAvailable(...); // Or however you implemented it
+
+        // STEP 3: Pick one mission from BACK to DONE
+        if (!backMissions.isEmpty()) {
+            BackToCompletedMissions();
+        }
+
+        // STEP 4: Pick 2 missions from EXEC to BACK
+        if (!execMissions.isEmpty()) {
+            ExecToBack();
+        }
+        if (!execMissions.isEmpty()) {
+            ExecToBack();
+        }
+
+        // STEP 5: Pick 1 mission from OUT to EXEC
+        if (!outMissions.isEmpty()) {
+            OutToExec();
+        }
+
+        // STEP 6: Assign RDY missions to rovers
+        assignMissions();
+
+        // STEP 7: Print ALL applicable info (UI logic)
+        // (UI print calls go here)
+
+        // STEP 8: Increment current_day
+        incrementDay();
+    }
+
+    // Simulation is over
+    cout << "Simulation Ended." << endl;
+
+    cout << "\n--- Final Completed Missions ---" << endl;
+    completedMissions.PrintStack();
+    cout << "--------------------------------" << endl;
 }
+    
+
 
 void MarsStation::addMission(Missions* newMission)
 {
@@ -212,17 +257,20 @@ void MarsStation::AddRoverToCheckup(Rovers* rover)
 
 void MarsStation::AddRoverToAvailable(Rovers* rover)
 {
-	RoverType Type=rover->getType();
+    RoverType Type = rover->getType();
     switch (Type) {
     case ROVER_POLAR:
         availablePolarRovers.enqueue(rover);
-
+        break; 
     case ROVER_NORMAL:
         availableNormalRovers.enqueue(rover);
-	case ROVER_DIGGING:
-		availableDiggingRovers.enqueue(rover);
+        break; 
+    case ROVER_DIGGING:
+        availableDiggingRovers.enqueue(rover);
+        break; 
     }
 }
+
 
 void MarsStation::ExecToBack()
 {
@@ -257,6 +305,88 @@ void MarsStation::incrementDay()
 	currentDay++;
 }
 
+bool MarsStation::ISsimdone() const {
+    // "End the simulation when ALL missions are in the DONE list"
+    // This means all pending requests are handled and all active mission lists are empty.
 
+    return pendingRequests.isEmpty() &&
+        readyPolarMissions.isEmpty() &&
+        readyNormalMissions.getCount() == 0 &&
+        readyDiggingMissions.isEmpty() &&
+        outMissions.getCount() == 0 &&
+        execMissions.isEmpty() &&
+        backMissions.isEmpty();
+}
+
+
+void MarsStation::assignMissions()
+{
+    Missions* pMission;
+    Rovers* pRover;
+
+    if (!readyPolarMissions.isEmpty() && !availablePolarRovers.isEmpty()) {
+
+        readyPolarMissions.dequeue(pMission);
+        availablePolarRovers.dequeue(pRover);
+        pMission->assignRover(pRover);
+
+ 
+        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+
+        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+
+        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+
+        int completionDay = executionEndDay + oneWayTravelTime;
+
+        pMission->setOneWayTravelTime(oneWayTravelTime);
+        pMission->setCompletionDay(completionDay);
+        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+
+        outMissions.enqueue(pMission, arrivalAtTargetDay);
+    }
+
+    // --- 2. Assign Digging Missions (DM) ---
+    // (Logic is identical to Polar)
+    if (!readyDiggingMissions.isEmpty() && !availableDiggingRovers.isEmpty()) {
+
+        readyDiggingMissions.dequeue(pMission);
+        availableDiggingRovers.dequeue(pRover);
+
+        pMission->assignRover(pRover);
+
+        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+        int completionDay = executionEndDay + oneWayTravelTime;
+
+        pMission->setOneWayTravelTime(oneWayTravelTime);
+        pMission->setCompletionDay(completionDay);
+        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+
+        outMissions.enqueue(pMission, arrivalAtTargetDay);
+    }
+
+    // --- 3. Assign Normal Missions (NM) ---
+    // (Logic is identical to Polar)
+    if (!readyNormalMissions.isEmpty() && !availableNormalRovers.isEmpty()) {
+
+        readyNormalMissions.dequeue(pMission);
+        availableNormalRovers.dequeue(pRover);
+
+        pMission->assignRover(pRover);
+
+        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+        int completionDay = executionEndDay + oneWayTravelTime;
+
+        pMission->setOneWayTravelTime(oneWayTravelTime);
+        pMission->setCompletionDay(completionDay);
+        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+
+        outMissions.enqueue(pMission, arrivalAtTargetDay);
+    }
+}
 
 
