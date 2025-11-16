@@ -3,6 +3,8 @@
 #include <iostream> 
 #include <fstream>
 #include <cmath> 
+#include "Rovers.h"
+#include "Missions.h"
 using namespace std;
 
 MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0) {
@@ -105,6 +107,8 @@ void MarsStation::runSimulation()
 
         // STEP 2: Move rover from Checkup to Available
         // (Your Step 2 logic)
+        CheckupToAvailable();
+       
         // CheckupToAvailable(...); // Or however you implemented it
 
         // STEP 3: Pick one mission from BACK to DONE
@@ -130,6 +134,20 @@ void MarsStation::runSimulation()
 
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
+		pUI->printDay(currentDay, this);
+        MarsStation* station = new MarsStation();
+        LinkedQueue<Rovers*> Test = station->getAvailableDiggingRovers();
+        Test.PrintQueue();
+        LinkedQueue<Missions*> Test2 = station->getReadyDiggingMissions();
+        Test2.PrintQueue();
+        LinkedQueue<Missions*> Test3 = station->getReadyPolarMissions();
+        Test3.PrintQueue();
+        LinkedQueue<Missions*> Test4 = station->getReadyNormalMissions();
+        Test4.PrintQueue();
+
+        priQueue<Missions*> Test5 = station->getBackMissions();
+        Test5.printQueue();
+
 
         // STEP 8: Increment current_day
         incrementDay();
@@ -258,17 +276,21 @@ void MarsStation::AddRoverToCheckup(Rovers* rover)
 void MarsStation::AddRoverToAvailable(Rovers* rover)
 {
     RoverType Type = rover->getType();
-    switch (Type) {
-    case ROVER_POLAR:
+
+    if (Type== ROVER_POLAR)
+    {
         availablePolarRovers.enqueue(rover);
-        break; 
-    case ROVER_NORMAL:
+    };
+    if (Type == ROVER_NORMAL)
+    {
         availableNormalRovers.enqueue(rover);
-        break; 
-    case ROVER_DIGGING:
+    };
+    if (Type == ROVER_DIGGING)
+    {
         availableDiggingRovers.enqueue(rover);
-        break; 
-    }
+    };
+
+
 }
 
 
@@ -290,14 +312,40 @@ void MarsStation::OutToExec()
 	execMissions.enqueue(mission, pri);
 }
 
-void MarsStation::CheckupToAvailable(Rovers* rover)
+
+void MarsStation::CheckupToAvailable()
 {
-    int randomnumber = (rand() % 100) + 1;
-    if (randomnumber < 70)
+    Rovers* rover;
+    int pri;
+
+    // STEP 1: Check if the first rover in the queue is done with its checkup duration.
+    // The priority 'pri' is the completion day, set in AddRoverToCheckup.
+    if (inCheckupRovers.peek(rover, pri) && pri <= currentDay)
     {
-		AddRoverToAvailable(rover);
+        // STEP 2: The rover is DONE with checkup time. Dequeue it for final processing.
+        inCheckupRovers.dequeue(rover, pri);
+
+        // The original checkup duration is over.
+        // We now apply the 30% random chance, but for a different purpose:
+        // A rover passing checkup should move to available, 
+        // A rover failing checkup should be reassigned a NEW checkup duration (e.g., for repair).
+
+        int randomnumber = (rand() % 100) + 1;
+
+        if (randomnumber < 70)
+        {
+            // 70% chance of being fine: Move to available
+            AddRoverToAvailable(rover);
+        }
+        else
+        {
+            // 30% chance of requiring more work: Re-enqueue for a second checkup duration
+            // This is the correct use of AddRoverToCheckup if repair is needed.
+            AddRoverToCheckup(rover);
+        }
     }
-    return;
+    // IMPORTANT: If the rover is NOT done (pri > currentDay), we do nothing and exit. 
+    // It remains in the checkup queue, waiting for the next day.
 }
 
 void MarsStation::incrementDay()
