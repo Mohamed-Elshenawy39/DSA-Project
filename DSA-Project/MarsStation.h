@@ -85,7 +85,7 @@ public:
 	void OutToExec();
 
 	//move rover from checkup to available Logic needs to be rewritten in next phase
-	void CheckupToAvailable(Rovers* rover);
+	void CheckupToAvailable();
 
     // Increment Current day
     void incrementDay(); 
