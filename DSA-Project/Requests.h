@@ -14,8 +14,9 @@ public:
 
     int getEventDay() const { return requestDay; }
     int getMissionID() const { return missionID; }
+	int getRequestDay() const { return requestDay; }
+	int getID() const { return missionID; }
 
     virtual void Operate(MarsStation* station) = 0;
 };
-ostream& operator<<(ostream& os, const Requests* request);
 

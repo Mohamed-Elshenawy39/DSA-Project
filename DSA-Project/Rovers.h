@@ -59,10 +59,7 @@ inline ostream& operator<<(ostream& os, const Rovers* rover)
     else
         typeStr = "Digging";
 
-    os << "[Rover " << rover->getID()
-        << " | Type: " << typeStr
-        << " | Speed: " << rover->getSpeed()
-        << " | Checkup Duration: " << rover->getCheckupDuration()
-        << "]\n";
+    os << " " << rover->getID();
+        
     return os;
 }

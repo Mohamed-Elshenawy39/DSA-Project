@@ -51,6 +51,8 @@ public:
 inline ostream& operator<<(ostream& os, const Missions* mission)
 {
     string typeStr;
+    if (mission->getAssignedRover() != nullptr)
+        os << "[";
 
     // Determine mission type 
     if (mission->getType() == MISSION_POLAR)
@@ -62,15 +64,10 @@ inline ostream& operator<<(ostream& os, const Missions* mission)
     else
         typeStr = "Unknown";
 
-    os << "[Mission ID: " << mission->getID()
-        << ", Type: " << typeStr
-        << ", Ready Day: " << mission->getFormulationDay()
-        << ", Target: " << mission->getTargetLocation() << " km"
-        << ", Duration: " << mission->getMissionDuration() << " days";
-
+    os << "" << mission->getID(); 
     if (mission->getAssignedRover() != nullptr)
-        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
-
-    os << "]\n";
+        os << "/" << mission->getAssignedRover()->getID()<< "";
+    os << "," << mission->getMissionDuration();
+    os << "] ";
     return os;
 }
