@@ -135,13 +135,19 @@ void MarsStation::runSimulation()
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
         MarsStation* station = new MarsStation();
-        readyNormalMissions.PrintQueue();
-        readyDiggingMissions.PrintQueue();
+        cout << "\n Ready Polar Missions:\n";
         readyPolarMissions.PrintQueue();
+        cout << "\n Ready Normal Missions:\n";
+        readyNormalMissions.PrintQueue();
+        cout << "\n Ready Digging Missions:\n";
+        readyDiggingMissions.PrintQueue();
+        cout << "\n Out Missions Missions:\n";
         outMissions.printQueue();
+        cout << "\n In-Execution Missions:\n";
         execMissions.printQueue();
+        cout << "\n Back Missions:\n";
         backMissions.printQueue();
-
+        
         assignMissions();
 
 
