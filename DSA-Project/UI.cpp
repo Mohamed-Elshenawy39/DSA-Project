@@ -1,18 +1,18 @@
 #include "UI.h"
 
-void UI::printDay(int day, const MarsStation* station) const
+void UI::printDay(int day,  MarsStation* station) 
 {
-	cout << "----- Day " << day << " -----" << endl;
+	cout << "\n----- Day " << day << " -----" << endl;
 	// Example: Print Ready Missions
-	cout << "Ready Polar Missions: ";
+	cout << "Ready Polar Missions: " << (station->getReadyPolarMissions()).getCount();
 	// (Assuming station has a method to get ready polar missions)
 	// You would implement the actual printing logic here
 	cout << endl;
-	cout << "Ready Normal Missions: ";
+	cout << "Ready Normal Missions: " << (station->getReadyNormalMissions()).getCount();
 	// (Assuming station has a method to get ready normal missions)
 	cout << endl;
-	cout << "Ready Digging Missions: ";
+	cout << "Ready Digging Missions: " << (station->getReadyDiggingMissions()).getCount();
 	// (Assuming station has a method to get ready digging missions)
-	cout << endl;
+	cout << endl << endl;
 	// Similarly, print other relevant information like Available Rovers, In-Progress Missions, etc.
 }

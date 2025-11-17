@@ -129,24 +129,20 @@ void MarsStation::runSimulation()
             OutToExec();
         }
 
+        pUI->printDay(currentDay, this);
         // STEP 6: Assign RDY missions to rovers
-        assignMissions();
 
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
-		pUI->printDay(currentDay, this);
         MarsStation* station = new MarsStation();
-        LinkedQueue<Rovers*> Test = station->getAvailableDiggingRovers();
-        Test.PrintQueue();
-        LinkedQueue<Missions*> Test2 = station->getReadyDiggingMissions();
-        Test2.PrintQueue();
-        LinkedQueue<Missions*> Test3 = station->getReadyPolarMissions();
-        Test3.PrintQueue();
-        LinkedQueue<Missions*> Test4 = station->getReadyNormalMissions();
-        Test4.PrintQueue();
+        readyNormalMissions.PrintQueue();
+        readyDiggingMissions.PrintQueue();
+        readyPolarMissions.PrintQueue();
+        outMissions.printQueue();
+        execMissions.printQueue();
+        backMissions.printQueue();
 
-        priQueue<Missions*> Test5 = station->getBackMissions();
-        Test5.printQueue();
+        assignMissions();
 
 
         // STEP 8: Increment current_day
@@ -184,7 +180,7 @@ void MarsStation::abortMission(int missionID)
 
 LinkedQueue<Missions*>& MarsStation::getReadyPolarMissions() 
 {
-	return readyPolarMissions;
+	return readyPolarMissions ;  
 }
 
 ReadyNormalMissionsQueue& MarsStation::getReadyNormalMissions()

@@ -5,6 +5,7 @@
 #include "priQueue.h"
 #include "Missions.h"
 #include "Rovers.h"
+#include "MarsStation.h"
 using namespace std;
 
 // Forward declare MarsStation to avoid circular include
@@ -24,7 +25,7 @@ public:
 
     int getMode() const;
     void waitForEnter() const;
-    void printDay(int day, const MarsStation* station) const;
+    void printDay(int day,  MarsStation* station) ;
     void printSilent() const;
     void printEndMessage() const;
 };
