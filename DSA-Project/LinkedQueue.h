@@ -219,7 +219,6 @@ void LinkedQueue<T>::PrintQueue() {
 		cout << current->getItem();
 		current = current->getNext();
 	}
-	cout << endl;
 }
 
 #endif
