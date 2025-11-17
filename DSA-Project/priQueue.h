@@ -69,6 +69,8 @@ public:
     }
 	void printQueue() {
 		priNode<T>* current = head;
+        if (!current)
+            cout << "The List is Empty" << endl;
 		while (current) {
 			int p = current ->getPri();
 			T item = current->getItem(p);

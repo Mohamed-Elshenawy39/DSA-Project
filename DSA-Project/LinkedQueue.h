@@ -215,6 +215,8 @@ LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& LQ)
 template <typename T>
 void LinkedQueue<T>::PrintQueue() {
 	Node<T>* current = frontPtr;
+	if (!current)
+		cout << "The list is Empty" << endl;
 	while (current) {
 		cout << current->getItem();
 		current = current->getNext();
