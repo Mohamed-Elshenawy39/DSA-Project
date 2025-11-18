@@ -367,6 +367,11 @@ bool MarsStation::ISsimdone() const {
         backMissions.isEmpty();
 }
 
+int MarsStation::getCurrentDay()
+{
+    return currentDay;
+}
+
 
 void MarsStation::assignMissions()
 {

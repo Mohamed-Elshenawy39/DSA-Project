@@ -1,5 +1,13 @@
 #include "UI.h"
 
+void UI::printPQ_Missions(const MarsStation* station, priQueue<Missions*>& pq) const
+{
+}
+
+void UI::printPQ_Rovers(const MarsStation* station, priQueue<Rovers*>& pq) const
+{
+}
+
 void UI::printDay(int day,  MarsStation* station) 
 {
 	cout << "\n Current Day: " << day << "" << endl;
