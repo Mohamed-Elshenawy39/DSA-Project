@@ -13,25 +13,28 @@ public:
         : Requests(Rd, id, type), missionType(mt), targetLocation(tl), missionDuration(md), significance(0) {
     }
 
+
 	MissionType getType() const { return missionType; }
 
     // Implementation of the pure virtual function from the base class.
     virtual void Operate(MarsStation* station);
+	virtual void print() const;
 };
 
-inline ostream& operator<<(ostream& os, const NewRequest* request) {
-    {
-        cout << "[ R";
-		if (request->getType() == MISSION_POLAR)
-            cout << "P";
-        else if (request->getType() == MISSION_NORMAL)
-            cout << "N";
-        else if (request->getType() == MISSION_DIGGING)
-            cout << "D";
-        cout << request->getRequestDay();
-        cout << "M" << request->getID() << " ] ,";
+//inline ostream& operator<<(ostream& os, const NewRequest* request) {
+//    {
+//        cout << "[ R";
+//        if (request->getType() == MISSION_POLAR)
+//            cout << "P";
+//        else if (request->getType() == MISSION_NORMAL)
+//            cout << "N";
+//        else if (request->getType() == MISSION_DIGGING)
+//            cout << "D";
+//        cout << request->getRequestDay();
+//        cout << "M" << request->getID() << " ] ,";
+//
+//        return os;
+//    }
+//}
 
-        return os;
-    }
-}
 
