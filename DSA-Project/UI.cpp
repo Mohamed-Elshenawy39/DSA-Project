@@ -11,25 +11,24 @@ void UI::printPQ_Rovers(const MarsStation* station, priQueue<Rovers*>& pq) const
 void UI::printDay(int day,  MarsStation* station)
 {
 	cout << "\n Current Day: " << day << "" << endl;
-	//cout << "===============" << "Requests List" << "===============" << endl;
-	////cout <<  << "Requests List" << "===============" << endl;
-	//MarsStation* marsStation = station;
-	///*cout << station->getpendingRequests().getCount() << " Pending Requests" << endl;
-	//for (int i = 0; i < 10; i++) {
+	cout << "==================Requests List===================" << endl;
+	LinkedQueue<Requests*> tempQueue = station->getpendingRequests();
 
-	//	Requests* req;
+	int pendingRequests = tempQueue.getCount();
+	cout << pendingRequests << " Requests :";
 
-	//	marsStation->getpendingRequests().peek(req);
-	//	if (req != nullptr) {
-	//		cout << req << " ";
-	//		marsStation->getpendingRequests().dequeue(req);
-	//	}
-	//	else {
-	//		break;
-	//	}
-	//}
-	//cout << endl;*/
-	cout << "===============" << "Ready List" << "===============" << endl;
+	int count = 0;
+	Requests* req;
+	while (count < 10 && tempQueue.dequeue(req)) // dequeue returns false if empty
+	{
+		req->print();
+		if (count < pendingRequests - 1 && count < 9) // if not the last request and less than 10
+			cout << ", ";
+		count++;
+	}
+
+cout << endl;
+cout << "====================Ready List====================" << endl;
 	int ReadyPolarMissions = station->getReadyPolarMissions().getCount();
 	int ReadyDiggingMissions = station->getReadyDiggingMissions().getCount();
 	int ReadyNormalMissions = station->getReadyNormalMissions().getCount();
@@ -57,7 +56,7 @@ void UI::printDay(int day,  MarsStation* station)
 	}
 	cout << endl;
 
-	cout << "===============" << "Avilable Rovers List" << "===============" << endl;
+	cout << "==============Available Rovers List===============" << endl;
 	int AvailablePolarRovers = station->getAvailablePolarRovers().getCount();
 	int AvailableDiggingRovers = station->getAvailableDiggingRovers().getCount();
 	int AvailableNormalRovers = station->getAvailableNormalRovers().getCount();
@@ -82,7 +81,7 @@ void UI::printDay(int day,  MarsStation* station)
 		cout << "]";
 	}
 	cout << endl;
-	cout << "===============" << "Out List" << "===============" << endl;
+	cout << "=====================Out List=====================" << endl;
 	int OutMissions = station->getOutMissions().getCount();
 	cout << OutMissions << " Missions/Rovers :";
 	if (OutMissions > 0){
@@ -90,16 +89,16 @@ void UI::printDay(int day,  MarsStation* station)
 	}
 	cout << endl;
 
-	cout << "===============" << "Execution List" << "===============" << endl;
+	cout << "==================Execution List==================" << endl;
 	int ExecMissions = station->getExecMissions().getCount();
 	
-		cout << ExecMissions << " Missions/Rovers :";
+	cout << ExecMissions << " Missions/Rovers :";
 	if (ExecMissions > 0) {
 		station->getExecMissions().printQueue();
 	}
 	cout << endl;
 
-	cout << "===============" << "Back List" << "===============" << endl;
+	cout << "====================Back List=====================" << endl;
 	int BackMissions = station->getBackMissions().getCount();
 	cout << BackMissions << " Missions/Rovers :";
 	if (BackMissions > 0) 
@@ -108,8 +107,7 @@ void UI::printDay(int day,  MarsStation* station)
 	}		
 	cout << endl;
 
-	cout << "===============" << "Aborted List" << "===============" << endl;
-
+	cout << "===================Aborted List===================" << endl;
 	int AbortedMissions = station->getAbortedMissions().getCount();
 	cout << AbortedMissions << " Missions :";
 	if (AbortedMissions >0)
@@ -118,7 +116,7 @@ void UI::printDay(int day,  MarsStation* station)
 	}
 	cout << endl;
 
-	cout << "===============" << "Check up List" << "===============" << endl;
+	cout << "==================Check up List===================" << endl;
 	int InCheckupRovers = station->getInCheckupRovers().getCount();
 	cout << InCheckupRovers << " Rovers :";
 	if (InCheckupRovers > 0) {
@@ -129,7 +127,7 @@ void UI::printDay(int day,  MarsStation* station)
 
 	cout << endl;
 
-	cout << "===============" << "Done List" << "===============" << endl;
+	cout << "====================Done List=====================" << endl;
 	cout << station->getCompletedMissions().getCount() << " Missions :";
 	station->getCompletedMissions().PrintStack();
 	cout << endl;

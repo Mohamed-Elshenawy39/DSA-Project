@@ -200,17 +200,17 @@ Input: LinkedQueue<T>: The Queue to be copied
 Output: none
 */
 
-template <typename T>
-LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& LQ)
-{
-	frontPtr = backPtr = nullptr;
-	Node<T>* NodePtr = LQ.frontPtr;	//start at the front node in LQ
-	while (NodePtr)
-	{
-		enqueue(NodePtr->getItem());	//get data of each node and enqueue it in this queue 
-		NodePtr = NodePtr->getNext();
-	}
-}
+//template <typename T>
+//LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& LQ)
+//{
+//	frontPtr = backPtr = nullptr;
+//	Node<T>* NodePtr = LQ.frontPtr;	//start at the front node in LQ
+//	while (NodePtr)
+//	{
+//		enqueue(NodePtr->getItem());	//get data of each node and enqueue it in this queue 
+//		NodePtr = NodePtr->getNext();
+//	}
+//}
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename T>
 void LinkedQueue<T>::PrintQueue() {
@@ -226,4 +226,16 @@ void LinkedQueue<T>::PrintQueue() {
 	}
 }
 
+template <typename T>
+LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& LQ)
+{
+	frontPtr = backPtr = nullptr;
+	count = 0; // <--- THIS WAS MISSING
+	Node<T>* NodePtr = LQ.frontPtr;	//start at the front node in LQ
+	while (NodePtr)
+	{
+		enqueue(NodePtr->getItem());	//get data of each node and enqueue it in this queue 
+		NodePtr = NodePtr->getNext();
+	}
+}
 #endif
