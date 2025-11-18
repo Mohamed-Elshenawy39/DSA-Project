@@ -8,7 +8,7 @@ void UI::printPQ_Rovers(const MarsStation* station, priQueue<Rovers*>& pq) const
 {
 }
 
-void UI::printDay(int day,  MarsStation* station) 
+void UI::printDay(int day,  MarsStation* station)
 {
 	cout << "\n Current Day: " << day << "" << endl;
 	//cout << "===============" << "Requests List" << "===============" << endl;
