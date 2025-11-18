@@ -92,7 +92,7 @@ public:
 
     bool ISsimdone() const;
 
-
+    int getCurrentDay();
 
 
 

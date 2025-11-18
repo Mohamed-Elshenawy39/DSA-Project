@@ -69,5 +69,11 @@ inline ostream& operator<<(ostream& os, const Missions* mission)
         os << "/" << mission->getAssignedRover()->getID()<< "";
     os << "," << mission->getMissionDuration();
     os << "] ";
+        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
+
+    os << "]\n";
+        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
+
+    os << "]\n";
     return os;
 }
