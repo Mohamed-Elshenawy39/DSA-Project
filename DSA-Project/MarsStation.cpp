@@ -143,7 +143,7 @@ void MarsStation::runSimulation()
     }
 
     // Simulation is over
-    cout << "Simulation Ended." << endl;
+    cout << "\nSIMULATION ENDED." << endl;
 }
     
 
@@ -156,9 +156,11 @@ void MarsStation::addMission(Missions* newMission)
     else if (newMission->getType() == MISSION_DIGGING) {
         readyDiggingMissions.enqueue(newMission);
     }
-    else {
+    else if (newMission->getType() == MISSION_NORMAL) {
         readyNormalMissions.enqueue(newMission);
     }
+    else if (newMission->getType() == MISSION_ABORT)
+        abortedMissions.enqueue(newMission);
 }
 
 void MarsStation::abortMission(int missionID)

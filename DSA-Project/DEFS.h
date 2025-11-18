@@ -6,7 +6,8 @@
 enum MissionType {
     MISSION_POLAR,
     MISSION_NORMAL,
-    MISSION_DIGGING
+    MISSION_DIGGING,
+    MISSION_ABORT
 };
 
 // Enum for the type of rover
