@@ -2,8 +2,8 @@
 #include "Requests.h"
 class AbortRequest : public Requests {
 public:
-    AbortRequest(int Rd, int id)
-        : Requests(Rd, id) {
+    AbortRequest(int Rd, int id, ReqType type)
+        : Requests(Rd, id , type) {
     }
 
     // Implementation of the pure virtual function from the base class.

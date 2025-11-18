@@ -9,8 +9,8 @@ private:
     int significance;
 
 public:
-    NewRequest(int Rd, int id, MissionType mt, int tl, int md)
-        : Requests(Rd, id), missionType(mt), targetLocation(tl), missionDuration(md), significance(0) {
+    NewRequest(int Rd, int id, MissionType mt, int tl, int md, ReqType type)
+        : Requests(Rd, id, type), missionType(mt), targetLocation(tl), missionDuration(md), significance(0) {
     }
 
 	MissionType getType() const { return missionType; }

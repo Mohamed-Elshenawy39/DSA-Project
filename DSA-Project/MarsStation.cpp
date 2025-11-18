@@ -70,13 +70,13 @@ void MarsStation::loadFromFile(const string& filename)
             else 
                 mt = MISSION_DIGGING;
 
-            Requests* pReq = new NewRequest(Rd, id, mt, tloc, md);
+            Requests* pReq = new NewRequest(Rd, id, mt, tloc, md, NEW_REQ);
             pendingRequests.enqueue(pReq);
         }
         else if (reqType == 'X') { // Abort Mission Request
             int ed, id;
             inputFile >> ed >> id;
-            Requests* pReq = new AbortRequest(ed, id);
+            Requests* pReq = new AbortRequest(ed, id , ABORT_REQ);
             pendingRequests.enqueue(pReq);
         }
     }
