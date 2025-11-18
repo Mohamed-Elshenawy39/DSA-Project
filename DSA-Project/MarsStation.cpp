@@ -156,10 +156,6 @@ void MarsStation::runSimulation()
 
     // Simulation is over
     cout << "Simulation Ended." << endl;
-
-    cout << "\n--- Final Completed Missions ---" << endl;
-    completedMissions.PrintStack();
-    cout << "--------------------------------" << endl;
 }
     
 

@@ -218,7 +218,10 @@ void LinkedQueue<T>::PrintQueue() {
 	if (!current)
 		cout << "The list is Empty" << endl;
 	while (current) {
-		cout << current->getItem();
+		if (current->getNext())
+			cout << current->getItem() << ",";
+		else
+			cout << current->getItem();
 		current = current->getNext();
 	}
 }

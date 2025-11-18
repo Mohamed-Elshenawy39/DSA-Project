@@ -34,7 +34,7 @@ void UI::printDay(int day,  MarsStation* station)
 	int ReadyDiggingMissions = station->getReadyDiggingMissions().getCount();
 	int ReadyNormalMissions = station->getReadyNormalMissions().getCount();
 	int totalReadyMissions = ReadyDiggingMissions + ReadyNormalMissions + ReadyPolarMissions;
-	cout << totalReadyMissions << "Missions :";
+	cout << totalReadyMissions << " Missions :";
 	if (ReadyNormalMissions > 0)
 	{
 		cout << "NMs[";
@@ -84,7 +84,7 @@ void UI::printDay(int day,  MarsStation* station)
 	cout << endl;
 	cout << "===============" << "Out List" << "===============" << endl;
 	int OutMissions = station->getOutMissions().getCount();
-	cout << OutMissions << "Missions/Rovers :";
+	cout << OutMissions << " Missions/Rovers :";
 	if (OutMissions > 0){
 	station->getOutMissions().printQueue();
 	}
@@ -93,7 +93,7 @@ void UI::printDay(int day,  MarsStation* station)
 	cout << "===============" << "Execution List" << "===============" << endl;
 	int ExecMissions = station->getExecMissions().getCount();
 	
-		cout << ExecMissions << "Missions/Rovers :";
+		cout << ExecMissions << " Missions/Rovers :";
 	if (ExecMissions > 0) {
 		station->getExecMissions().printQueue();
 	}
@@ -101,7 +101,7 @@ void UI::printDay(int day,  MarsStation* station)
 
 	cout << "===============" << "Back List" << "===============" << endl;
 	int BackMissions = station->getBackMissions().getCount();
-	cout << BackMissions << "Missions/Rovers :";
+	cout << BackMissions << " Missions/Rovers :";
 	if (BackMissions > 0) 
 	{
 		station->getBackMissions().printQueue();
@@ -111,7 +111,7 @@ void UI::printDay(int day,  MarsStation* station)
 	cout << "===============" << "Aborted List" << "===============" << endl;
 
 	int AbortedMissions = station->getAbortedMissions().getCount();
-	cout << AbortedMissions << "Missions :";
+	cout << AbortedMissions << " Missions :";
 	if (AbortedMissions >0)
 	{
 		station->getAbortedMissions().PrintQueue();
@@ -121,8 +121,11 @@ void UI::printDay(int day,  MarsStation* station)
 	cout << "===============" << "Check up List" << "===============" << endl;
 	int InCheckupRovers = station->getInCheckupRovers().getCount();
 	cout << InCheckupRovers << " Rovers :";
-	if (InCheckupRovers > 0)
-	station->getInCheckupRovers().printQueue();
+	if (InCheckupRovers > 0) {
+		cout << "[";
+		station->getInCheckupRovers().printQueue();
+		cout << "]";
+	}
 
 	cout << endl;
 

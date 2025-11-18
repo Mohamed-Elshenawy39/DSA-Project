@@ -51,29 +51,15 @@ public:
 inline ostream& operator<<(ostream& os, const Missions* mission)
 {
     string typeStr;
-    if (mission->getAssignedRover() != nullptr)
+    if (mission->getAssignedRover() == nullptr) {
+        os << mission->getID();
+    }
+    if (mission->getAssignedRover() != nullptr) {
         os << "[";
-
-    // Determine mission type 
-    if (mission->getType() == MISSION_POLAR)
-        typeStr = "Polar";
-    else if (mission->getType() == MISSION_NORMAL)
-        typeStr = "Normal";
-    else if (mission->getType() == MISSION_DIGGING)
-        typeStr = "Digging";
-    else
-        typeStr = "Unknown";
-
-    os << "" << mission->getID(); 
-    if (mission->getAssignedRover() != nullptr)
-        os << "/" << mission->getAssignedRover()->getID()<< "";
-    os << "," << mission->getMissionDuration();
-    os << "] ";
-        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
-
-    os << "]\n";
-        os << ", Assigned Rover ID: " << mission->getAssignedRover()->getID();
-
-    os << "]\n";
+        os << mission->getID();
+        os << "/" << mission->getAssignedRover()->getID() << "";
+        os << "," << mission->getMissionDuration();
+        os << "Days] ";
+    }
     return os;
 }
