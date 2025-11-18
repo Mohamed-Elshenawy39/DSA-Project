@@ -70,7 +70,11 @@ public:
 	{
 		for (int i = top; i >= 0; i--)
 		{
-			cout << items[i];
+			if (i > 1)
+				cout << items[i] << ",";
+			else
+				cout << items[i];
+
 		}
 	}
 
