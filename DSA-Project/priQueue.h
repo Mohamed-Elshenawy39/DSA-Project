@@ -74,8 +74,10 @@ public:
 		while (current) {
 			int p = current ->getPri();
 			T item = current->getItem(p);
-			cout << item;
-            //cout << "Priority: " << current->getPri();
+            if (current->getNext())
+                cout << item << ",";
+            else
+                cout << item;
 			current = current->getNext();
 		}
 	}
