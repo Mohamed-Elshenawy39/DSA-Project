@@ -98,7 +98,6 @@ void MarsStation::processPendingRequests()
 void MarsStation::runSimulation()
 {
 	loadFromFile("Input.txt");
-    processPendingRequests();
     while (!ISsimdone())
     {
         // STEP 1: Process new requests scheduled for today
