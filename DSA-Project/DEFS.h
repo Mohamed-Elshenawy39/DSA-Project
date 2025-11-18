@@ -16,3 +16,8 @@ enum RoverType {
     ROVER_DIGGING
 };
 
+enum ReqType {
+    NEW_REQ,
+    ABORT_REQ
+};
+
