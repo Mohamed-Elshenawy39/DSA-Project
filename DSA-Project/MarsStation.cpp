@@ -164,6 +164,7 @@ void MarsStation::addMission(Missions* newMission)
 
 void MarsStation::abortMission(int missionID)
 {
+    // To be done in Phase 2
 }
 
 

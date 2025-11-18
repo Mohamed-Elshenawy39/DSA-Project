@@ -9,5 +9,4 @@ int main() {
 	MarsStation *station = new MarsStation();
 	station->runSimulation();
 	return 0;
-	//sheno
 }

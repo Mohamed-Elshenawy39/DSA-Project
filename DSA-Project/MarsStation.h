@@ -38,7 +38,7 @@ private:
     LinkedQueue<Rovers*> availableDiggingRovers;
 
     // 4. In-Progress Missions (Per your final design)
-    OutMissionsPriQueue outMissions;            // MODIFIED: Use derived class
+    OutMissionsPriQueue outMissions;    // MODIFIED: Use derived class
     priQueue<Missions*> execMissions;   // Priority: Execution End Day
     priQueue<Missions*> backMissions;   // Priority: Final Completion Day
 
