@@ -68,6 +68,10 @@ public:
 
 	void PrintStack() const
 	{
+		if (isEmpty()) 
+		{
+			cout << "The stack is empty." << endl;
+		}
 		for (int i = top; i >= 0; i--)
 		{
 			if (i > 1)

@@ -226,6 +226,10 @@ void LinkedQueue<T>::PrintQueue() {
 	}
 }
 
+
+
+
+
 template <typename T>
 LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& LQ)
 {

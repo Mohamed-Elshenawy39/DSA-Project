@@ -123,6 +123,7 @@ cout << "==================== Ready List ====================" << endl;
 
 	cout << "==================== Done List =====================" << endl;
 	cout << station->getCompletedMissions().getCount() << " Missions :";
+	if (station->getCompletedMissions().getCount() > 0)
 	station->getCompletedMissions().PrintStack();
 	cout << endl;
 }

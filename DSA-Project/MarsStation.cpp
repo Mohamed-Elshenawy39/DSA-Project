@@ -341,9 +341,7 @@ void MarsStation::incrementDay()
 }
 
 bool MarsStation::ISsimdone() const {
-    // "End the simulation when ALL missions are in the DONE list"
-    // This means all pending requests are handled and all active mission lists are empty.
-
+    
     return pendingRequests.isEmpty() &&
         readyPolarMissions.isEmpty() &&
         readyNormalMissions.getCount() == 0 &&
@@ -386,8 +384,6 @@ void MarsStation::assignMissions()
         outMissions.enqueue(pMission, arrivalAtTargetDay);
     }
 
-    // --- 2. Assign Digging Missions (DM) ---
-    // (Logic is identical to Polar)
     if (!readyDiggingMissions.isEmpty() && !availableDiggingRovers.isEmpty()) {
 
         readyDiggingMissions.dequeue(pMission);
@@ -407,8 +403,7 @@ void MarsStation::assignMissions()
         outMissions.enqueue(pMission, arrivalAtTargetDay);
     }
 
-    // --- 3. Assign Normal Missions (NM) ---
-    // (Logic is identical to Polar)
+    
     if (!readyNormalMissions.isEmpty() && !availableNormalRovers.isEmpty()) {
 
         readyNormalMissions.dequeue(pMission);

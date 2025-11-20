@@ -50,14 +50,14 @@ public:
 // Operator Overload
 inline ostream& operator<<(ostream& os, const Rovers* rover)
 {   
-    string typeStr;
+ /*   string typeStr;
 
     if (rover->getType() == ROVER_NORMAL)
         typeStr = "Normal";
     else if (rover->getType() == ROVER_POLAR)
         typeStr = "Polar";
     else
-        typeStr = "Digging";
+        typeStr = "Digging";*/
 
     os << rover->getID();
         
