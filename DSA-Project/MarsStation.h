@@ -31,11 +31,13 @@ private:
     LinkedQueue<Missions*> readyPolarMissions;
     ReadyNormalMissionsQueue readyNormalMissions;
     LinkedQueue<Missions*> readyDiggingMissions;
+    LinkedQueue<Missions*> rescueMissions;
 
     // 3. Available Rovers
     LinkedQueue<Rovers*> availablePolarRovers;
     LinkedQueue<Rovers*> availableNormalRovers;
     LinkedQueue<Rovers*> availableDiggingRovers;
+    LinkedQueue<Rovers*> availableRescueRovers;
 
     // 4. In-Progress Missions (Per your final design)
     OutMissionsPriQueue outMissions;    // MODIFIED: Use derived class
@@ -75,8 +77,12 @@ public:
 	// NEW: Done mission pushed to completed missions
 	void BackToCompletedMissions();
 
+	//NEW: Check for mission failure and handle rescue
+    void checkMissionFailure();
+
     //NEW: Add rover to checkup queue 
 	void AddRoverToCheckup(Rovers* rover);
+
 	//NEW: Add rover to its available queue
 	void AddRoverToAvailable(Rovers* rover);
 	
@@ -105,6 +111,7 @@ public:
      LinkedQueue<Missions*>& getReadyPolarMissions();
      ReadyNormalMissionsQueue& getReadyNormalMissions();
      LinkedQueue<Missions*>& getReadyDiggingMissions();
+     LinkedQueue<Missions*>& getRescueMissions();
 
      OutMissionsPriQueue& getOutMissions(); 
      priQueue<Missions*>& getExecMissions();
@@ -118,5 +125,7 @@ public:
      ArrayStack<Missions*>& getCompletedMissions();
      LinkedQueue<Missions*>& getAbortedMissions();
      LinkedQueue<Requests*> getpendingRequests();
+     LinkedQueue<Rovers*>& getAvailableRescueRovers();
+
 };
 
