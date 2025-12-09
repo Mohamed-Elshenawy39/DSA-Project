@@ -22,4 +22,5 @@ public:
     void printDay(int day,  MarsStation* station) ;
     void printSilent() const;
     void printEndMessage() const;
+    
 };

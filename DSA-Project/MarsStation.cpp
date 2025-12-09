@@ -285,25 +285,37 @@ LinkedQueue<Requests*> MarsStation::getpendingRequests()
 
 // NEW:COV
 
-void MarsStation::BackToCompletedMissions()  
+void MarsStation::BackToCompletedMissions()
 {
-    Missions* mission;
-    int pri;
-    backMissions.dequeue(mission, pri);
-    completedMissions.push(mission);
-  
-    Rovers* rover  = mission->getAssignedRover();
-	int randomnumber = (rand() % 100) + 1; // Random number between 1 and 100
-    rover->setMissionsDone(randomnumber);
-	bool test=rover->needsCheckup(rover);
-    if (test)
-        AddRoverToCheckup(rover);
-    else
-		AddRoverToAvailable(rover);
+    Missions* pMission;
+    int completionDay; 
 
+    while (backMissions.peek(pMission, completionDay) && completionDay <= currentDay)
+    {
+        backMissions.dequeue(pMission, completionDay);
 
+        completedMissions.push(pMission);
 
+        // 2. Handle the Rover
+        Rovers* pRover = pMission->getAssignedRover();
+        pRover->incrementMissionsCompleted();
+
+        if (pRover->needsCheckup())
+        {
+            int checkupEndDay = currentDay + pRover->getCheckupDuration();
+
+            inCheckupRovers.enqueue(pRover, checkupEndDay);
+
+            pRover->resetMissionsCompleted();
+        }
+        else
+        {
+            AddRoverToAvailable(pRover);
+        }
+    }
 }
+
+
 
 void MarsStation::AddRoverToCheckup(Rovers* rover)
 {
@@ -384,71 +396,106 @@ int MarsStation::getCurrentDay()
 }
 
 
-void MarsStation::assignMissions()
+void MarsStation::assignMissions() //Aty 3 points
 {
     Missions* pMission;
     Rovers* pRover;
 
-    if (!readyPolarMissions.isEmpty() && !availablePolarRovers.isEmpty()) {
+    while (!readyPolarMissions.isEmpty())
+    {
+        pRover = nullptr;
 
-        readyPolarMissions.dequeue(pMission);
-        availablePolarRovers.dequeue(pRover);
-        pMission->assignRover(pRover);
+        // Try to find a rover in order 
+        if (!availablePolarRovers.isEmpty())
+            availablePolarRovers.dequeue(pRover);
+        else if (!availableNormalRovers.isEmpty())
+            availableNormalRovers.dequeue(pRover);
+        else if (!availableDiggingRovers.isEmpty())
+            availableDiggingRovers.dequeue(pRover);
+
+        // assign it
+        if (pRover)
+        {
+            readyPolarMissions.dequeue(pMission);
+            pMission->assignRover(pRover);
+
+            int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+            int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+            int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+            int completionDay = executionEndDay + oneWayTravelTime;
+
+            pMission->setOneWayTravelTime(oneWayTravelTime);
+            pMission->setCompletionDay(completionDay);
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+
+            // Move to OUT list (Priority = Arrival Day)
+            outMissions.enqueue(pMission, arrivalAtTargetDay);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    while (!readyDiggingMissions.isEmpty())
+    {
+        pRover = nullptr;
+
+        if (!availableDiggingRovers.isEmpty())
+        {
+            availableDiggingRovers.dequeue(pRover);
+            readyDiggingMissions.dequeue(pMission);
+            pMission->assignRover(pRover);
+
+            int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+            int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+            int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+            int completionDay = executionEndDay + oneWayTravelTime;
+
+            pMission->setOneWayTravelTime(oneWayTravelTime);
+            pMission->setCompletionDay(completionDay);
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+
+            outMissions.enqueue(pMission, arrivalAtTargetDay);
+        }
+        else
+        {
+            break;
+        }
+    }
 
  
-        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+    while (!readyNormalMissions.isEmpty())
+    {
+        pRover = nullptr;
 
-        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+        if (!availableNormalRovers.isEmpty())
+            availableNormalRovers.dequeue(pRover);
+        else if (!availablePolarRovers.isEmpty())
+            availablePolarRovers.dequeue(pRover);
 
-        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+        if (pRover)
+        {
+            readyNormalMissions.dequeue(pMission);
+            pMission->assignRover(pRover);
 
-        int completionDay = executionEndDay + oneWayTravelTime;
+            int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
+            int arrivalAtTargetDay = currentDay + oneWayTravelTime;
+            int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
+            int completionDay = executionEndDay + oneWayTravelTime;
 
-        pMission->setOneWayTravelTime(oneWayTravelTime);
-        pMission->setCompletionDay(completionDay);
-        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setOneWayTravelTime(oneWayTravelTime);
+            pMission->setCompletionDay(completionDay);
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
-        outMissions.enqueue(pMission, arrivalAtTargetDay);
-    }
-
-    if (!readyDiggingMissions.isEmpty() && !availableDiggingRovers.isEmpty()) {
-
-        readyDiggingMissions.dequeue(pMission);
-        availableDiggingRovers.dequeue(pRover);
-
-        pMission->assignRover(pRover);
-
-        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
-        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
-        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
-        int completionDay = executionEndDay + oneWayTravelTime;
-
-        pMission->setOneWayTravelTime(oneWayTravelTime);
-        pMission->setCompletionDay(completionDay);
-        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
-
-        outMissions.enqueue(pMission, arrivalAtTargetDay);
-    }
-
-    
-    if (!readyNormalMissions.isEmpty() && !availableNormalRovers.isEmpty()) {
-
-        readyNormalMissions.dequeue(pMission);
-        availableNormalRovers.dequeue(pRover);
-
-        pMission->assignRover(pRover);
-
-        int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
-        int arrivalAtTargetDay = currentDay + oneWayTravelTime;
-        int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
-        int completionDay = executionEndDay + oneWayTravelTime;
-
-        pMission->setOneWayTravelTime(oneWayTravelTime);
-        pMission->setCompletionDay(completionDay);
-        pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
-
-        outMissions.enqueue(pMission, arrivalAtTargetDay);
+            outMissions.enqueue(pMission, arrivalAtTargetDay);
+        }
+        else
+        {
+            break;
+        }
     }
 }
+
 
 

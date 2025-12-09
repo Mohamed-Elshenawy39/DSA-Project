@@ -23,7 +23,7 @@
         if (maxMissionsBeforeCheckup == 0) return false;
         return missionsCompleted >= maxMissionsBeforeCheckup;
     }
-    
+      
 	// Overloaded function with parameter to check on third requirment
    
     
