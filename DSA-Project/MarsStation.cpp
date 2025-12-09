@@ -205,15 +205,17 @@ void MarsStation::abortMission(int missionID) //Sheno - 4 Points
     if (outMissions.AbortMission(missionID, pMis)) {
         if (!pMis) return;
 
-        abortedMissions.enqueue(pMis);
-        pRov = pMis->getAssignedRover();
+        if (pMis->getType() == MISSION_NORMAL) {
+            abortedMissions.enqueue(pMis);
+            pRov = pMis->getAssignedRover();
 
-        int returnTime = pMis->getOneWayTravelTime();
-        int BackDay = currentDay + returnTime;
+            int returnTime = pMis->getOneWayTravelTime();
+            int BackDay = currentDay + returnTime;
 
-        // Rover is now returning (forced checkup state until return day)
-        inCheckupRovers.enqueue(pRov, BackDay);
-        return;
+            // Rover is now returning (forced checkup state until return day)
+            inCheckupRovers.enqueue(pRov, BackDay);
+            return;
+        }
     }
 }
 
