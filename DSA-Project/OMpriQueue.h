@@ -16,7 +16,7 @@ public:
         }
 
         // Case 1: The mission to abort is at the head
-        if (head->getItem(dummyPri)->getID() == missionID) {
+        if (head->getItem(dummyPri)->getID() == missionID && head->getItem(dummyPri)->getType() == MISSION_NORMAL) {
 
             dequeue(abortedMission, dummyPri); // Use base class dequeue
             return true;
@@ -27,7 +27,7 @@ public:
         priNode<Missions*>* current = head->getNext();
 
         while (current) {
-            if (current->getItem(dummyPri)->getID() == missionID) {
+            if (current->getItem(dummyPri)->getID() == missionID && current->getItem(dummyPri)->getType() == MISSION_NORMAL) {
                 // Found it. Unlink the node.
                 previous->setNext(current->getNext()); // Link previous to next
                 abortedMission = current->getItem(dummyPri); // Get the mission pointer
