@@ -127,3 +127,64 @@ cout << "==================== Ready List ====================" << endl;
 	station->getCompletedMissions().PrintStack();
 	cout << endl;
 }
+
+void UI::printSilent() const
+{
+	cout << "Silent Mode" << endl;
+	cout << "Simulation Starts..." << endl;
+}
+
+void UI::printEndMessage() const
+{
+	cout << "Simulation Ends..." << endl;
+}
+
+int UI::getMode() const
+{
+	int mode;
+	cout << "Select Program Mode:" << endl;
+	cout << "1. Interactive Mode" << endl;
+	cout << "2. Silent Mode" << endl;
+	cout << "Enter choice: ";
+	cin >> mode;
+
+	// Input validation (Optional but recommended)
+	while (mode != 1 && mode != 2)
+	{
+		cout << "Invalid choice. Please enter 1 or 2: ";
+		cin >> mode;
+	}
+
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+	return mode;
+}
+
+// In DSA-Project/UI.cpp
+
+string UI::getInFile() const
+{
+	string filename;
+	cout << "Enter Input File Name (e.g., Input.txt): ";
+	cin >> filename;
+	return filename;
+}
+
+string UI::getOutFile() const
+{
+	string filename;
+	cout << "Enter Output File Name (e.g., Output.txt): ";
+	cin >> filename;
+	return filename;
+}
+
+void UI::waitForEnter() const
+{
+	cout << "Press Enter to continue to next day...";
+
+	if (cin.peek() == '\n') {
+		cin.ignore();
+	}
+
+	cin.get();
+}
