@@ -145,6 +145,34 @@ void MarsStation::runSimulation()
     cout << "\nSIMULATION ENDED." << endl;
 }
     
+void MarsStation::AutoAbortPolarMissions() { //Shenawy - 1 Point
+
+    LinkedQueue<Missions*> tempQueue;
+    Missions* pMis;
+
+    while (readyPolarMissions.dequeue(pMis)) {
+        // Condition: PM waiting in the ready list > double its duration
+
+        // Waiting Days = Current Day - Formulation Day (Rday)
+        int waitingDays = currentDay - pMis->getFormulationDay();
+        int abortThreshold = 2 * pMis->getMissionDuration();
+
+        if (waitingDays > abortThreshold) {
+            // Abort condition met
+            abortedMissions.enqueue(pMis);
+        }
+        else {
+            // Condition not met, mission is safe, put in temp queue
+            tempQueue.enqueue(pMis);
+        }
+    }
+
+    // Restore the non-aborted missions to the original queue
+    while (tempQueue.dequeue(pMis)) {
+        readyPolarMissions.enqueue(pMis);
+    }
+}
+
 
 
 void MarsStation::addMission(Missions* newMission)
@@ -162,9 +190,31 @@ void MarsStation::addMission(Missions* newMission)
         abortedMissions.enqueue(newMission);
 }
 
-void MarsStation::abortMission(int missionID)
+void MarsStation::abortMission(int missionID) //Sheno - 4 Points
 {
-    // To be done in Phase 2
+    Missions* pMis = nullptr;
+    Rovers* pRov = nullptr;
+
+    // 1. Try to find and abort from RDY_NM list
+    if (readyNormalMissions.AbortMission(missionID, pMis)) {
+        if (pMis) abortedMissions.enqueue(pMis);
+        return;
+    }
+
+    // 2. Try to find and abort from OUT_missions list
+    if (outMissions.AbortMission(missionID, pMis)) {
+        if (!pMis) return;
+
+        abortedMissions.enqueue(pMis);
+        pRov = pMis->getAssignedRover();
+
+        int returnTime = pMis->getOneWayTravelTime();
+        int BackDay = currentDay + returnTime;
+
+        // Rover is now returning (forced checkup state until return day)
+        inCheckupRovers.enqueue(pRov, BackDay);
+        return;
+    }
 }
 
 
@@ -300,39 +350,16 @@ void MarsStation::OutToExec()
 }
 
 
-void MarsStation::CheckupToAvailable()
+void MarsStation::CheckupToAvailable() //Shenawy-2 Points
 {
-    Rovers* rover;
-    int pri;
+    Rovers* pRov;
+    int EndofCheckup;
 
-    // STEP 1: Check if the first rover in the queue is done with its checkup duration.
-    // The priority 'pri' is the completion day, set in AddRoverToCheckup.
-    if (inCheckupRovers.peek(rover, pri) && pri <= currentDay)
-    {
-        // STEP 2: The rover is DONE with checkup time. Dequeue it for final processing.
-        inCheckupRovers.dequeue(rover, pri);
-
-        // The original checkup duration is over.
-        // We now apply the 30% random chance, but for a different purpose:
-        // A rover passing checkup should move to available, 
-        // A rover failing checkup should be reassigned a NEW checkup duration (e.g., for repair).
-
-        int randomnumber = (rand() % 100) + 1;
-
-        if (randomnumber < 70)
-        {
-            // 70% chance of being fine: Move to available
-            AddRoverToAvailable(rover);
-        }
-        else
-        {
-            // 30% chance of requiring more work: Re-enqueue for a second checkup duration
-            // This is the correct use of AddRoverToCheckup if repair is needed.
-            AddRoverToCheckup(rover);
-        }
+    // 1. Check Rovers finishing Checkup (Checkup -> Available)
+    while (inCheckupRovers.peek(pRov, EndofCheckup) && EndofCheckup <= currentDay) {
+        inCheckupRovers.dequeue(pRov, EndofCheckup);
+        AddRoverToAvailable(pRov);
     }
-    // IMPORTANT: If the rover is NOT done (pri > currentDay), we do nothing and exit. 
-    // It remains in the checkup queue, waiting for the next day.
 }
 
 void MarsStation::incrementDay()

@@ -60,8 +60,10 @@ public:
     MarsStation();
     ~MarsStation();
 
+
     void runSimulation();
 
+    void AutoAbortPolarMissions();
     // Public function to be called by Request::Operate
     void addMission(Missions* newMission);
 

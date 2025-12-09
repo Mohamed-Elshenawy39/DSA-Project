@@ -21,20 +21,4 @@ public:
 	virtual void print() const;
 };
 
-//inline ostream& operator<<(ostream& os, const NewRequest* request) {
-//    {
-//        cout << "[ R";
-//        if (request->getType() == MISSION_POLAR)
-//            cout << "P";
-//        else if (request->getType() == MISSION_NORMAL)
-//            cout << "N";
-//        else if (request->getType() == MISSION_DIGGING)
-//            cout << "D";
-//        cout << request->getRequestDay();
-//        cout << "M" << request->getID() << " ] ,";
-//
-//        return os;
-//    }
-//}
-
 
