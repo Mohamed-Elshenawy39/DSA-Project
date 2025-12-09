@@ -24,8 +24,15 @@ cout << "==================== Ready List ====================" << endl;
 	int ReadyPolarMissions = station->getReadyPolarMissions().getCount();
 	int ReadyDiggingMissions = station->getReadyDiggingMissions().getCount();
 	int ReadyNormalMissions = station->getReadyNormalMissions().getCount();
-	int totalReadyMissions = ReadyDiggingMissions + ReadyNormalMissions + ReadyPolarMissions;
+	int RescueMissions = station->getRescueMissions().getCount();
+	int totalReadyMissions = ReadyDiggingMissions + ReadyNormalMissions + ReadyPolarMissions+ RescueMissions;
 	cout << totalReadyMissions << " Missions :";
+	if (RescueMissions > 0)
+	{
+		cout << " RMs[";
+		station->getRescueMissions().PrintQueue();
+		cout << "]";
+	}
 	if (ReadyNormalMissions > 0)
 	{
 		cout << "NMs[";
@@ -52,7 +59,8 @@ cout << "==================== Ready List ====================" << endl;
 	int AvailablePolarRovers = station->getAvailablePolarRovers().getCount();
 	int AvailableDiggingRovers = station->getAvailableDiggingRovers().getCount();
 	int AvailableNormalRovers = station->getAvailableNormalRovers().getCount();
-	int totalAvailableRovers = AvailableDiggingRovers + AvailableNormalRovers + AvailablePolarRovers;
+	int AvilableRescueRovers = station->getAvailableRescueRovers().getCount();
+	int totalAvailableRovers = AvailableDiggingRovers + AvailableNormalRovers + AvailablePolarRovers + AvilableRescueRovers;
 	cout << totalAvailableRovers << " Rovers :";
 	if (AvailableNormalRovers > 0)
 	{
@@ -70,6 +78,12 @@ cout << "==================== Ready List ====================" << endl;
 	{
 		cout << " PR[";
 		station->getAvailablePolarRovers().PrintQueue();
+		cout << "]";
+	}
+	if (AvilableRescueRovers > 0)
+	{
+		cout << " RR[";
+		station->getAvailableRescueRovers().PrintQueue();
 		cout << "]";
 	}
 	cout << endl;
@@ -148,7 +162,6 @@ int UI::getMode() const
 	cout << "Enter choice: ";
 	cin >> mode;
 
-	// Input validation (Optional but recommended)
 	while (mode != 1 && mode != 2)
 	{
 		cout << "Invalid choice. Please enter 1 or 2: ";
@@ -160,7 +173,6 @@ int UI::getMode() const
 	return mode;
 }
 
-// In DSA-Project/UI.cpp
 
 string UI::getInFile() const
 {

@@ -43,7 +43,8 @@ public:
     void setWaitingDays(int wd);
     void setTdays(int td);
     void setOneWayTravelTime(int tt);
-    
+    // Missions.h
+    void setMissionDuration(int d);
 
 
 };
