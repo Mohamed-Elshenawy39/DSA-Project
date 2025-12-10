@@ -32,6 +32,7 @@ private:
     ReadyNormalMissionsQueue readyNormalMissions;
     LinkedQueue<Missions*> readyDiggingMissions;
     LinkedQueue<Missions*> rescueMissions;
+	LinkedQueue<Missions*> readyComplexMissions; 
 
     // 3. Available Rovers
     LinkedQueue<Rovers*> availablePolarRovers;
@@ -112,6 +113,7 @@ public:
      ReadyNormalMissionsQueue& getReadyNormalMissions();
      LinkedQueue<Missions*>& getReadyDiggingMissions();
      LinkedQueue<Missions*>& getRescueMissions();
+	 LinkedQueue<Missions*>& getReadyComplexMissions();
 
      OutMissionsPriQueue& getOutMissions(); 
      priQueue<Missions*>& getExecMissions();
