@@ -377,6 +377,10 @@ void MarsStation::AddRoverToAvailable(Rovers* rover)
     {
         availableDiggingRovers.enqueue(rover);
     };
+    if (Type == ROVER_RESCUE)
+    {
+        availableRescueRovers.enqueue(rover);
+	};
 
 
 }
@@ -384,12 +388,39 @@ void MarsStation::AddRoverToAvailable(Rovers* rover)
 
 void MarsStation::ExecToBack()
 {
-    Missions* mission;
-	int pri;
-	execMissions.dequeue(mission, pri);
-    
-    backMissions.enqueue(mission, pri);
-	
+    Missions* pMission;
+    int completionDay; // This is the priority from the exec queue
+
+    while (execMissions.peek(pMission, completionDay) && completionDay <= currentDay)
+    {
+        // 1. Remove from Exec Queue
+        execMissions.dequeue(pMission, completionDay);
+
+        Rovers* pRover = pMission->getAssignedRover();
+        double speed = pRover->getSpeed();
+
+        if (pMission->getType() == MISSION_COMPLEX)
+        {
+            for (int i = 0; i < pMission->getExtraRoverCount(); i++)
+            {
+                Rovers* extra = pMission->getExtraRover(i);
+                if (extra && extra->getSpeed() < speed)
+                {
+                    speed = extra->getSpeed();
+                }
+            }
+        }
+
+        
+        int distance = pMission->getTargetLocation();
+        int returnDays = ceil(distance / speed);
+
+        // 4. Calculate Arrival Day at Station
+        int arrivalDay = currentDay + returnDays;
+
+        // 5. Move to Back Queue
+        backMissions.enqueue(pMission, arrivalDay);
+    }
 }
 
 #include <cmath> // Required for ceil()
