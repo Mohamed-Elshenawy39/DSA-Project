@@ -292,9 +292,10 @@ LinkedQueue<Missions*>& MarsStation::getRescueMissions()
 {
     return rescueMissions;
 }
+
 LinkedQueue<Missions*>& MarsStation::getReadyComplexMissions()
 {
-    return complexMissions;
+    return readyComplexMissions;
 }
 // NEW:COV
 
@@ -312,17 +313,43 @@ void MarsStation::BackToCompletedMissions()
         Rovers* pRover = pMission->getAssignedRover();
         pRover->incrementMissionsCompleted();
 
-        if (pRover->needsCheckup())
+       
+       
+        if (pMission->getType() == MISSION_COMPLEX)
         {
-            int checkupEndDay = currentDay + pRover->getCheckupDuration();
-
-            inCheckupRovers.enqueue(pRover, checkupEndDay);
+            int restDays = 3; // Fixed rest period
+            int restEndDay = currentDay + restDays;
+            for (int i = 0; i < pMission->getExtraRoverCount(); i++)
+            {
+                Rovers* extraRover = pMission->getExtraRover(i);
+                if (extraRover)
+                {
+                    extraRover->incrementMissionsCompleted();
+                    inCheckupRovers.enqueue(extraRover, restEndDay);
+                }
+            }
 
             pRover->resetMissionsCompleted();
+
+            inCheckupRovers.enqueue(pRover, restEndDay);
         }
         else
         {
-            AddRoverToAvailable(pRover);
+            // STANDARD LOGIC (Normal/Polar/Digging)
+            // Only goes to checkup if missionsCompleted reached the limit 'M'
+            if (pRover->needsCheckup())
+            {
+                int checkupEndDay = currentDay + pRover->getCheckupDuration();
+
+                inCheckupRovers.enqueue(pRover, checkupEndDay);
+
+                pRover->resetMissionsCompleted();
+            }
+
+            else
+            {
+                AddRoverToAvailable(pRover);
+            }
         }
     }
 }
@@ -365,12 +392,46 @@ void MarsStation::ExecToBack()
 	
 }
 
+#include <cmath> // Required for ceil()
+
 void MarsStation::OutToExec()
 {
-    Missions* mission;
-    int pri;
-	outMissions.dequeue(mission, pri);
-	execMissions.enqueue(mission, pri);
+    Missions* pMission;
+    int oldPriority; // We won't use this for the execution queue
+
+    // Process all missions currently in the 'Out' buffer
+    while (outMissions.dequeue(pMission, oldPriority))
+    {
+        Rovers* pRover = pMission->getAssignedRover();
+
+        // --- STEP 1: Determine Effective Speed ---
+        int speed = pRover->getSpeed();
+
+        // If Complex, the speed is determined by the slowest rover in the group
+        if (pMission->getType() == MISSION_COMPLEX)
+        {
+            for (int i = 0; i < pMission->getExtraRoverCount(); i++)
+            {
+                Rovers* extra = pMission->getExtraRover(i);
+                if (extra && extra->getSpeed() < speed)
+                {
+                    speed = extra->getSpeed();
+                }
+            }
+        }
+
+        // --- STEP 2: Calculate Duration ---
+        int distance = pMission->getTargetLocation();
+
+        // We use ceil to round up (e.g., 100 dist / 30 speed = 3.33 -> 4 days)
+        int executionDays = ceil(distance / speed);
+
+        // --- STEP 3: Calculate Finish Time ---
+        int completionDay = currentDay + executionDays;
+
+        // --- STEP 4: Move to Exec Queue ---
+        execMissions.enqueue(pMission, completionDay);
+    }
 }
 
 
@@ -428,17 +489,16 @@ void MarsStation::assignMissions() //Aty 3 points
             int originalFinishDay = pMission->getCompletionDay();
 
             // Calculate Key Days
-            // (Assuming Fday included the return trip)
             int originalLaunchDay = originalFinishDay - originalDuration - (2 * originalOneWayDays);
             int arrivalAtSiteDay = originalLaunchDay + originalOneWayDays;
             int finishExecDay = arrivalAtSiteDay + originalDuration;
 
             // Variables for calculations
-            double failedSpeed = pFailedRover->getSpeed();
-            double rescueSpeed = pRover->getSpeed();
+            int failedSpeed = pFailedRover->getSpeed();
+            int rescueSpeed = pRover->getSpeed();
 
             
-            double fullDistance = originalOneWayDays * failedSpeed;
+            int fullDistance = originalOneWayDays * failedSpeed;
 
             int timeRescueTravelsToTarget = 0;
             int timeFailedRoverReturns = 0;
@@ -454,10 +514,10 @@ void MarsStation::assignMissions() //Aty 3 points
                 if (daysTraveled < 0) daysTraveled = 0;
 
                 // Distance to the Failure Point
-                double distToFailure = daysTraveled * failedSpeed;
+                int distToFailure = daysTraveled * failedSpeed;
 
                 // Distance Remaining to Target
-                double distRemaining = fullDistance - distToFailure;
+                int distRemaining = fullDistance - distToFailure;
 
                 // 1. Rescue Rover Travel (Base -> Failure Point)
                 timeRescueTravelsToTarget = ceil(distToFailure / rescueSpeed);
@@ -506,10 +566,10 @@ void MarsStation::assignMissions() //Aty 3 points
                 int daysReturning = currentDay - finishExecDay;
 
                 // Distance covered on return
-                double distTraveledBack = daysReturning * failedSpeed;
+                int distTraveledBack = daysReturning * failedSpeed;
 
                 // Distance Remaining to Base (Failure Point -> Base)
-                double distRemainingToBase = fullDistance - distTraveledBack;
+                int distRemainingToBase = fullDistance - distTraveledBack;
                 if (distRemainingToBase < 0) distRemainingToBase = 0;
 
                 // 1. Rescue Rover Travel (Base -> Failure Point)
@@ -547,6 +607,91 @@ void MarsStation::assignMissions() //Aty 3 points
         }
         else
         {
+            break;
+        }
+    }
+
+    while (!readyComplexMissions.isEmpty())
+    {
+        // 1. Peek at the mission to see how many rovers it needs
+        readyComplexMissions.peek(pMission);
+        int roversNeeded = pMission->getRoversNeeded();
+
+        // 2. We need to gather 'roversNeeded' rovers.
+        Rovers* gatheredRovers[3] = { nullptr, nullptr, nullptr };
+        bool possible = true;
+
+        // --- Step A: Get the Leader (Digging Rover) ---
+        if (availableDiggingRovers.isEmpty()) {
+            possible = false;
+        }
+        else {
+            availableDiggingRovers.dequeue(gatheredRovers[0]);
+        }
+
+        // --- Step B: Get Extra Rovers (if needed) ---
+        if (possible && roversNeeded > 1)
+        {
+            // Lambda to pick any available rover (excluding Rescue)
+            auto getExtraRover = [&]() -> Rovers* {
+                Rovers* r = nullptr;
+                if (!availableNormalRovers.isEmpty()) availableNormalRovers.dequeue(r);
+                else if (!availablePolarRovers.isEmpty()) availablePolarRovers.dequeue(r);
+                else if (!availableDiggingRovers.isEmpty()) availableDiggingRovers.dequeue(r);
+                return r;
+                };
+
+            for (int i = 1; i < roversNeeded; ++i) {
+                gatheredRovers[i] = getExtraRover();
+                if (gatheredRovers[i] == nullptr) {
+                    possible = false; // Not enough extras available
+                    break;
+                }
+            }
+        }
+
+        // --- Step C: Finalize or Rollback ---
+        if (possible)
+        {
+            // SUCCESS: We have all required rovers
+            readyComplexMissions.dequeue(pMission);
+
+            // Assign Leader
+            pMission->assignRover(gatheredRovers[0]);
+
+            // Assign Extras
+            for (int i = 1; i < roversNeeded; ++i) {
+                pMission->addExtraRover(gatheredRovers[i]);
+            }
+
+            // Calculate Speed (Slowest of the group determines pace)
+            int slowestSpeed = gatheredRovers[0]->getSpeed();
+            for (int i = 1; i < roversNeeded; ++i) {
+                if (gatheredRovers[i]->getSpeed() < slowestSpeed) {
+                    slowestSpeed = gatheredRovers[i]->getSpeed();
+                }
+            }
+
+            // Calculate Timings
+            int oneWay = ceil(pMission->getTargetLocation() / (slowestSpeed * 25.0));
+            int arrival = currentDay + oneWay;
+            int completion = arrival + pMission->getMissionDuration() + oneWay;
+
+            pMission->setOneWayTravelTime(oneWay);
+            pMission->setCompletionDay(completion);
+
+            outMissions.enqueue(pMission, arrival);
+        }
+        else
+        {
+            // FAILURE: Not enough rovers. Return everyone we took to their lists.
+            for (int i = 0; i < 3; ++i) {
+                if (gatheredRovers[i] != nullptr) {
+                    AddRoverToAvailable(gatheredRovers[i]);
+                }
+            }
+
+            // Stop checking complex missions for today
             break;
         }
     }
