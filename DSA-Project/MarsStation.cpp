@@ -292,6 +292,10 @@ LinkedQueue<Missions*>& MarsStation::getRescueMissions()
 {
     return rescueMissions;
 }
+LinkedQueue<Missions*>& MarsStation::getReadyComplexMissions()
+{
+    return complexMissions;
+}
 // NEW:COV
 
 void MarsStation::BackToCompletedMissions()
@@ -642,11 +646,6 @@ void MarsStation::assignMissions() //Aty 3 points
             break;
         }
     }
-}
-
-LinkedQueue<Rovers*>& MarsStation::getAvailableRescueRovers()
-{
-    return availableRescueRovers;
 }
 
 void MarsStation::checkMissionFailure()
