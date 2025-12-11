@@ -608,6 +608,7 @@ void MarsStation::assignMissions() //Aty 3 points
 
             // 2. Update Mission
             pMission->assignRover(pRover);
+            pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
             pMission->setOneWayTravelTime(newOneWayTravel);
             pMission->setCompletionDay(newCompletionDay);
 
@@ -687,6 +688,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int completion = arrival + pMission->getMissionDuration() + oneWay;
 
             pMission->setOneWayTravelTime(oneWay);
+            pMission->setTdays(2 * oneWay + pMission->getMissionDuration());
             pMission->setCompletionDay(completion);
 
             outMissions.enqueue(pMission, -arrival);
@@ -730,6 +732,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int completionDay = executionEndDay + oneWayTravelTime;
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
+            pMission->setTdays(2*oneWayTravelTime + pMission->getMissionDuration());
             pMission->setCompletionDay(completionDay);
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
@@ -758,6 +761,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int completionDay = executionEndDay + oneWayTravelTime;
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
+            pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
             pMission->setCompletionDay(completionDay);
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
@@ -791,6 +795,7 @@ void MarsStation::assignMissions() //Aty 3 points
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
             pMission->setCompletionDay(completionDay);
+            pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
             outMissions.enqueue(pMission, -arrivalAtTargetDay);
