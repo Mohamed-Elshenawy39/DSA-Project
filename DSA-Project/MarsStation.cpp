@@ -144,6 +144,7 @@ void MarsStation::runSimulation()
     }
 
     generateOutputFile("Output.txt");
+	cout << "\nOutput file 'Output.txt' generated successfully." << endl;
     // Simulation is over
     cout << "\nSIMULATION ENDED." << endl;
 }
