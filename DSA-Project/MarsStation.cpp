@@ -7,7 +7,7 @@
 #include "Missions.h"
 using namespace std;
 
-MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0) {
+MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0), AutoAbortCount(0) {
     pUI = new UI();
 }
 
@@ -139,6 +139,7 @@ void MarsStation::runSimulation()
         incrementDay();
     }
 
+    generateOutputFile("Output.txt");
     // Simulation is over
     cout << "\nSIMULATION ENDED." << endl;
 }
@@ -529,15 +530,15 @@ void MarsStation::assignMissions() //Aty 3 points
                 int distRemaining = fullDistance - distToFailure;
 
                 // 1. Rescue Rover Travel (Base -> Failure Point)
-                timeRescueTravelsToTarget = ceil(distToFailure / rescueSpeed);
+                timeRescueTravelsToTarget = ceil(distToFailure / (25 * rescueSpeed));
 
                 // 2. Failed Rover Return (Failure Point -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(distToFailure / failedSpeed);
+                timeFailedRoverReturns = ceil(distToFailure / (25 * failedSpeed));
 
                 // 3. New Schedule for Rescue Rover
-                int timeToCompleteTravel = ceil(distRemaining / rescueSpeed);
+                int timeToCompleteTravel = ceil(distRemaining / (25 * rescueSpeed));
                 int durationWork = originalDuration;
-                int timeRescueReturn = ceil(fullDistance / rescueSpeed);
+                int timeRescueReturn = ceil(fullDistance / (25 * rescueSpeed));
 
                 // New Completion = (Arrival at Failure) + (Travel to Target) + (Duration) + (Return)
                 int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
@@ -550,17 +551,17 @@ void MarsStation::assignMissions() //Aty 3 points
             else if (currentDay <= finishExecDay)
             {
                 // 1. Rescue Rover Travel (Base -> Target)
-                timeRescueTravelsToTarget = ceil(fullDistance / rescueSpeed);
+                timeRescueTravelsToTarget = ceil(fullDistance / (25 * rescueSpeed));
 
                 // 2. Failed Rover Return (Target -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(fullDistance / failedSpeed); // Should equal originalOneWayDays
+                timeFailedRoverReturns = ceil(fullDistance / (25 * failedSpeed)); // Should equal originalOneWayDays
 
                 // 3. New Schedule
                 int daysWorked = currentDay - arrivalAtSiteDay;
                 int remainingDuration = originalDuration - daysWorked;
                 if (remainingDuration < 0) remainingDuration = 0;
 
-                int timeRescueReturn = ceil(fullDistance / rescueSpeed);
+                int timeRescueReturn = ceil(fullDistance / (25*rescueSpeed));
 
                 int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
                 newCompletionDay = rescueArrivalDate + remainingDuration + timeRescueReturn;
@@ -582,10 +583,10 @@ void MarsStation::assignMissions() //Aty 3 points
                 if (distRemainingToBase < 0) distRemainingToBase = 0;
 
                 // 1. Rescue Rover Travel (Base -> Failure Point)
-                timeRescueTravelsToTarget = ceil(distRemainingToBase / rescueSpeed);
+                timeRescueTravelsToTarget = ceil(distRemainingToBase / (25 * rescueSpeed));
 
                 // 2. Failed Rover Return (Failure Point -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(distRemainingToBase / failedSpeed);
+                timeFailedRoverReturns = ceil(distRemainingToBase / (25 * failedSpeed));
 
                 // 3. New Schedule
                 
@@ -611,6 +612,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
             pMission->setOneWayTravelTime(newOneWayTravel);
             pMission->setCompletionDay(newCompletionDay);
+			pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
             // 3. Move to OUT List
             outMissions.enqueue(pMission, -rescueArrivalDate);
@@ -689,8 +691,8 @@ void MarsStation::assignMissions() //Aty 3 points
 
             pMission->setOneWayTravelTime(oneWay);
             pMission->setTdays(2 * oneWay + pMission->getMissionDuration());
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
             pMission->setCompletionDay(completion);
-
             outMissions.enqueue(pMission, -arrival);
         }
         else
@@ -762,8 +764,8 @@ void MarsStation::assignMissions() //Aty 3 points
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
             pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
-            pMission->setCompletionDay(completionDay);
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setCompletionDay(completionDay);
 
             outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
@@ -863,4 +865,84 @@ void MarsStation::checkMissionFailure()
     {
         outMissions.enqueue(pMission, priority);
     }
+}
+
+void MarsStation::generateOutputFile(const string& filename)
+{
+    ofstream OutputFile(filename);
+    if (!OutputFile.is_open()) {
+        cout << "Error: Could not open output file." << endl;
+        return;
+    }
+
+    OutputFile << "Fday\tID\tRday\tWdays\tMDUR\tTdays\n";
+
+    ArrayStack<Missions*>temp = completedMissions;
+    Missions* m;
+    double sumW = 0;
+    double sumMDUR = 0;
+    double sumT = 0;
+    int countCompleted = completedMissions.getCount();
+    int doneN = 0;
+    int doneP = 0;
+    int doneD = 0;
+    int doneC = 0;
+    int abortedCount = abortedMissions.getCount();
+    int countNR = availableNormalRovers.getCount();
+    int countPR = availablePolarRovers.getCount();
+    int countDR = availableDiggingRovers.getCount();
+    int countRR = availableRescueRovers.getCount();
+
+    while (!temp.isEmpty())
+    {
+        temp.pop(m);
+        OutputFile << m->getCompletionDay() << "\t"
+            << m->getID() << "\t"
+            << m->getFormulationDay() << "\t"
+            << m->getWaitingDays() << "\t"
+            << m->getMissionDuration() << "\t"
+            << m->getTdays() << "\n";
+
+        sumMDUR += m->getMissionDuration();
+        sumW += m->getWaitingDays();
+        sumT += m->getTdays();
+        if (m->getType() == MISSION_NORMAL)
+            doneN++;
+        else if (m->getType() == MISSION_POLAR)
+            doneP++;
+        else if (m->getType() == MISSION_DIGGING)
+            doneD++;
+        else if (m->getType() == MISSION_COMPLEX)
+            doneC++;
+    }
+    double avgW = sumW / countCompleted;
+    double avgMDUR = sumMDUR / countCompleted;
+    double avgT = sumT / countCompleted;
+    double ratioW_MDUR = (sumW / sumMDUR) * 100;
+    int totalMissions = countCompleted + abortedCount;
+    double Auto_Aborted = (AutoAbortCount / abortedCount) * 100;
+    int totalRovers = countNR + countPR + countDR + countRR;
+
+    OutputFile << "\nMissions: " << totalMissions;
+
+    OutputFile << " [N: " << doneN
+        << ", P: " << doneP
+        << ", D: " << doneD
+        << ", C: " << doneC << "] ";
+
+    OutputFile << "[" << countCompleted << " DONE, "
+        << abortedCount << " Aborted]\n\n";
+
+    OutputFile << "Rovers: " << totalRovers;
+    OutputFile << " [N: " << countNR << ", P: " << countPR << ", D: " << countDR << ", RR: " << countRR << "]\n";
+
+    OutputFile << "Avg Wdays = " << avgW
+        << ", Avg MDUR = " << avgMDUR
+        << ", Avg Tdays = " << avgT << "\n";
+
+    OutputFile << "% Avg_Wdays/ Avg_MDUR = " << ratioW_MDUR << "%, ";
+    OutputFile << "Auto-Aborted Missions = " << Auto_Aborted << "%\n";
+
+
+    OutputFile.close();
 }

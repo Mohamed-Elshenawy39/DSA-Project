@@ -21,6 +21,7 @@ private:
     int currentDay;
     UI* pUI; // Pointer to the UI object
     int maxMissionsBeforeCheckup; // The 'M' value
+    int AutoAbortCount;
 
     // --- Lists of Pointers to Objects ---
 

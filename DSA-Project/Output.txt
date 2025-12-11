@@ -1,0 +1,20 @@
+Fday	ID	Rday	Wdays	MDUR	Tdays
+153	113	7	112	22	34
+51	109	5	0	30	46
+35	105	3	0	20	32
+45	116	9	0	26	36
+76	114	7	47	14	22
+33	106	3	0	18	30
+39	107	4	0	25	35
+23	110	5	0	10	18
+26	112	6	0	16	20
+19	103	2	0	15	17
+15	102	1	0	12	14
+11	101	1	0	10	10
+11	104	2	0	9	9
+
+Missions: 16 [N: 2, P: 4, D: 4, C: 3] [13 DONE, 3 Aborted]
+
+Rovers: 34 [N: 15, P: 10, D: 5, RR: 4]
+Avg Wdays = 12.2308, Avg MDUR = 17.4615, Avg Tdays = 24.8462
+% Avg_Wdays/ Avg_MDUR = 70.0441%, Auto-Aborted Missions = 0%
