@@ -13,70 +13,71 @@ MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0) {
 
 void MarsStation::loadFromFile(const string& filename)
 {
-
     // Create an ifstream object
     ifstream inputFile(filename);
-
-    // Check if the file opened successfully
     if (!inputFile.is_open()) {
-        cout << "Error: Could not open input file." << endl;
+        std::cout << "Error: Could not open input file. Terminating." << std::endl;
         return;
     }
 
-    int numDR, numPR, numNR;
-    inputFile >> numDR >> numPR >> numNR;
+    int numDR, numPR, numNR, numRR; // RR for Rescue Rovers
+    inputFile >> numDR >> numPR >> numNR >> numRR;
 
-    int speedDR, speedPR, speedNR;
-    inputFile >> speedDR >> speedPR >> speedNR;
+    int speedDR, speedPR, speedNR, speedRR; // Speed for RR
+    inputFile >> speedDR >> speedPR >> speedNR >> speedRR;
 
-    int checkupDR, checkupPR, checkupNR;
+    int checkupDR, checkupPR, checkupNR, checkupRR; // Checkup for RR
 
-    inputFile >> this->maxMissionsBeforeCheckup >> checkupDR >> checkupPR >> checkupNR;
+    // Reading M, Checkup durations
+    inputFile >> maxMissionsBeforeCheckup >> checkupDR >> checkupPR >> checkupNR >> checkupRR;
 
-    // Create and enqueue Digging Rovers
+    // Create Rovers
+    int roverID = 1;
     for (int i = 0; i < numDR; ++i) {
-        Rovers* pRov = new Rovers(i + 1, ROVER_DIGGING, speedDR, checkupDR, maxMissionsBeforeCheckup);
+        Rovers* pRov = new Rovers(roverID++, ROVER_DIGGING, speedDR, checkupDR, maxMissionsBeforeCheckup);
         availableDiggingRovers.enqueue(pRov);
     }
-    // Create and enqueue Polar Rovers
     for (int i = 0; i < numPR; ++i) {
-        Rovers* pRov = new Rovers(i + 1 + numDR, ROVER_POLAR, speedPR, checkupPR, maxMissionsBeforeCheckup);
+        Rovers* pRov = new Rovers(roverID++, ROVER_POLAR, speedPR, checkupPR, maxMissionsBeforeCheckup);
         availablePolarRovers.enqueue(pRov);
     }
-    // Create and enqueue Normal Rovers
     for (int i = 0; i < numNR; ++i) {
-        Rovers* pRov = new Rovers(i + 1 + numDR + numPR, ROVER_NORMAL, speedNR, checkupNR, maxMissionsBeforeCheckup);
+        Rovers* pRov = new Rovers(roverID++, ROVER_NORMAL, speedNR, checkupNR, maxMissionsBeforeCheckup);
         availableNormalRovers.enqueue(pRov);
     }
+    for (int i = 0; i < numRR; ++i) { // Creating Rescue Rovers
+        Rovers* pRov = new Rovers(roverID++, ROVER_RESCUE, speedRR, checkupRR, 0); // Rescue rovers don't need M check
+        availableRescueRovers.enqueue(pRov);
+    }
 
-    // Loop to read all the requests
+
     int numRequests;
     inputFile >> numRequests;
     for (int i = 0; i < numRequests; ++i) {
         char reqType;
         inputFile >> reqType;
-        if (reqType == 'R') { // New Mission Request
-            char missionType;
-            int Rd, id, tloc, md;
-            inputFile >> missionType >> Rd >> id >> tloc >> md;
+        if (reqType == 'R') {
+            char missionTypeChar;
+            int Rd, id, tloc, md, sig = 10;
+
+            inputFile >> missionTypeChar >> Rd >> id >> tloc >> md;
 
             MissionType mt;
-            if (missionType == 'P') 
-                mt = MISSION_POLAR;
-
-            else if (missionType == 'N') 
-                mt = MISSION_NORMAL;
-
-            else 
-                mt = MISSION_DIGGING;
+            if (missionTypeChar == 'P') mt = MISSION_POLAR;
+            else if (missionTypeChar == 'N') mt = MISSION_NORMAL;
+            else if (missionTypeChar == 'D') mt = MISSION_DIGGING;
+            else {
+                mt = MISSION_COMPLEX;
+                inputFile >> sig;
+            }
 
             Requests* pReq = new NewRequest(Rd, id, mt, tloc, md, NEW_REQ);
             pendingRequests.enqueue(pReq);
         }
-        else if (reqType == 'X') { // Abort Mission Request
+        else if (reqType == 'X') {
             int ed, id;
             inputFile >> ed >> id;
-            Requests* pReq = new AbortRequest(ed, id , ABORT_REQ);
+            Requests* pReq = new AbortRequest(ed, id, ABORT_REQ);
             pendingRequests.enqueue(pReq);
         }
     }
@@ -114,10 +115,6 @@ void MarsStation::runSimulation()
             BackToCompletedMissions();
         }
 
-        // STEP 4: Pick 2 missions from EXEC to BACK
-        if (!execMissions.isEmpty()) {
-            ExecToBack();
-        }
         if (!execMissions.isEmpty()) {
             ExecToBack();
         }
@@ -128,6 +125,7 @@ void MarsStation::runSimulation()
         }
 
         // STEP 6: Assign RDY missions to rovers
+       // checkMissionFailure();
         assignMissions();
 
         // STEP 7: Print ALL applicable info (UI logic)
@@ -186,6 +184,12 @@ void MarsStation::addMission(Missions* newMission)
     else if (newMission->getType() == MISSION_NORMAL) {
         readyNormalMissions.enqueue(newMission);
     }
+    else if (newMission->getType() == MISSION_COMPLEX) {
+        readyComplexMissions.enqueue(newMission);
+    }
+    else if (newMission->getType() == MISSION_RESCUE) {
+        rescueMissions.enqueue(newMission);
+    }
     else if (newMission->getType() == MISSION_ABORT)
         abortedMissions.enqueue(newMission);
 }
@@ -212,7 +216,7 @@ void MarsStation::abortMission(int missionID) //Sheno - 4 Points
         int BackDay = currentDay + returnTime;
 
         // Rover is now returning (forced checkup state until return day)
-        inCheckupRovers.enqueue(pRov, BackDay);
+        inCheckupRovers.enqueue(pRov, -BackDay);
         return;
     }
 }
@@ -304,7 +308,7 @@ void MarsStation::BackToCompletedMissions()
     Missions* pMission;
     int completionDay; 
 
-    while (backMissions.peek(pMission, completionDay) && completionDay <= currentDay)
+    while (backMissions.peek(pMission, completionDay) && -completionDay <= currentDay)
     {
         backMissions.dequeue(pMission, completionDay);
 
@@ -325,13 +329,13 @@ void MarsStation::BackToCompletedMissions()
                 if (extraRover)
                 {
                     extraRover->incrementMissionsCompleted();
-                    inCheckupRovers.enqueue(extraRover, restEndDay);
+                    inCheckupRovers.enqueue(extraRover, -restEndDay);
                 }
             }
 
             pRover->resetMissionsCompleted();
 
-            inCheckupRovers.enqueue(pRover, restEndDay);
+            inCheckupRovers.enqueue(pRover, -restEndDay);
         }
         else
         {
@@ -341,7 +345,7 @@ void MarsStation::BackToCompletedMissions()
             {
                 int checkupEndDay = currentDay + pRover->getCheckupDuration();
 
-                inCheckupRovers.enqueue(pRover, checkupEndDay);
+                inCheckupRovers.enqueue(pRover, -checkupEndDay);
 
                 pRover->resetMissionsCompleted();
             }
@@ -358,7 +362,7 @@ void MarsStation::BackToCompletedMissions()
 
 void MarsStation::AddRoverToCheckup(Rovers* rover)
 {
-	inCheckupRovers.enqueue(rover, currentDay + rover->getCheckupDuration());
+	inCheckupRovers.enqueue(rover, -(currentDay + rover->getCheckupDuration()));
 }
 
 void MarsStation::AddRoverToAvailable(Rovers* rover)
@@ -391,7 +395,7 @@ void MarsStation::ExecToBack()
     Missions* pMission;
     int completionDay; // This is the priority from the exec queue
 
-    while (execMissions.peek(pMission, completionDay) && completionDay <= currentDay)
+    while (execMissions.peek(pMission, completionDay) && -completionDay <= currentDay)
     {
         // 1. Remove from Exec Queue
         execMissions.dequeue(pMission, completionDay);
@@ -419,11 +423,9 @@ void MarsStation::ExecToBack()
         int arrivalDay = currentDay + returnDays;
 
         // 5. Move to Back Queue
-        backMissions.enqueue(pMission, arrivalDay);
+        backMissions.enqueue(pMission, -arrivalDay);
     }
 }
-
-#include <cmath> // Required for ceil()
 
 void MarsStation::OutToExec()
 {
@@ -433,35 +435,11 @@ void MarsStation::OutToExec()
     // Process all missions currently in the 'Out' buffer
     while (outMissions.dequeue(pMission, oldPriority))
     {
-        Rovers* pRover = pMission->getAssignedRover();
+        int executionDays = pMission->getMissionDuration();
 
-        // --- STEP 1: Determine Effective Speed ---
-        int speed = pRover->getSpeed();
-
-        // If Complex, the speed is determined by the slowest rover in the group
-        if (pMission->getType() == MISSION_COMPLEX)
-        {
-            for (int i = 0; i < pMission->getExtraRoverCount(); i++)
-            {
-                Rovers* extra = pMission->getExtraRover(i);
-                if (extra && extra->getSpeed() < speed)
-                {
-                    speed = extra->getSpeed();
-                }
-            }
-        }
-
-        // --- STEP 2: Calculate Duration ---
-        int distance = pMission->getTargetLocation();
-
-        // We use ceil to round up (e.g., 100 dist / 30 speed = 3.33 -> 4 days)
-        int executionDays = ceil(distance / speed);
-
-        // --- STEP 3: Calculate Finish Time ---
         int completionDay = currentDay + executionDays;
 
-        // --- STEP 4: Move to Exec Queue ---
-        execMissions.enqueue(pMission, completionDay);
+        execMissions.enqueue(pMission, -completionDay);
     }
 }
 
@@ -472,7 +450,7 @@ void MarsStation::CheckupToAvailable() //Shenawy-2 Points
     int EndofCheckup;
 
     // 1. Check Rovers finishing Checkup (Checkup -> Available)
-    while (inCheckupRovers.peek(pRov, EndofCheckup) && EndofCheckup <= currentDay) {
+    while (inCheckupRovers.peek(pRov, EndofCheckup) && -EndofCheckup <= currentDay) {
         inCheckupRovers.dequeue(pRov, EndofCheckup);
         AddRoverToAvailable(pRov);
     }
@@ -626,7 +604,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int failedRoverArrivalAtBase = rescueArrivalDate + timeFailedRoverReturns;
 
             // Enqueue Failed Rover for Checkup
-            inCheckupRovers.enqueue(pFailedRover, failedRoverArrivalAtBase);
+            inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
 
             // 2. Update Mission
             pMission->assignRover(pRover);
@@ -634,7 +612,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setCompletionDay(newCompletionDay);
 
             // 3. Move to OUT List
-            outMissions.enqueue(pMission, rescueArrivalDate);
+            outMissions.enqueue(pMission, -rescueArrivalDate);
         }
         else
         {
@@ -711,7 +689,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setOneWayTravelTime(oneWay);
             pMission->setCompletionDay(completion);
 
-            outMissions.enqueue(pMission, arrival);
+            outMissions.enqueue(pMission, -arrival);
         }
         else
         {
@@ -756,7 +734,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
             // Move to OUT list (Priority = Arrival Day)
-            outMissions.enqueue(pMission, arrivalAtTargetDay);
+            outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
         else
         {
@@ -783,7 +761,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setCompletionDay(completionDay);
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
-            outMissions.enqueue(pMission, arrivalAtTargetDay);
+            outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
         else
         {
@@ -815,7 +793,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setCompletionDay(completionDay);
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
 
-            outMissions.enqueue(pMission, arrivalAtTargetDay);
+            outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
         else
         {
@@ -829,7 +807,9 @@ void MarsStation::checkMissionFailure()
     int failureThreshold = 5; // 5% chance
     Missions* pMission;
     int priority;
-    priQueue<Missions*> tempQueue;
+
+    // === 1. CHECK EXEC MISSIONS ===
+    priQueue<Missions*> tempExecQueue;
 
     while (execMissions.dequeue(pMission, priority))
     {
@@ -838,18 +818,44 @@ void MarsStation::checkMissionFailure()
 
         if (randVal <= failureThreshold)
         {
-         
+            // Mission Fails! Move to Rescue Queue
             rescueMissions.enqueue(pMission);
         }
         else
         {
-            tempQueue.enqueue(pMission, priority);
+            // Mission Survives, put back in temp queue
+            tempExecQueue.enqueue(pMission, priority);
         }
     }
-
-    while (tempQueue.dequeue(pMission, priority))
+    // Restore EXEC missions
+    while (tempExecQueue.dequeue(pMission, priority))
     {
         execMissions.enqueue(pMission, priority);
     }
-}
 
+    // === 2. CHECK OUT MISSIONS ===
+    priQueue<Missions*> tempOutQueue;
+
+    while (outMissions.dequeue(pMission, priority))
+    {
+        // Generate random number (1-100)
+        int randVal = rand() % 100 + 1;
+
+        if (randVal <= failureThreshold)
+        {
+            // Mission Fails! Move to Rescue Queue
+            rescueMissions.enqueue(pMission);
+        }
+        else
+        {
+            // Mission Survives, put back in temp queue
+            tempOutQueue.enqueue(pMission, priority);
+        }
+    }
+
+    // Restore OUT missions
+    while (tempOutQueue.dequeue(pMission, priority))
+    {
+        outMissions.enqueue(pMission, priority);
+    }
+}

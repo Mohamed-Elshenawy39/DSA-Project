@@ -55,7 +55,7 @@ private:
     // --- Private Helper Functions ---
     void loadFromFile(const string& filename);
     void processPendingRequests();
-    void processCompletions();
+
     void assignMissions();
     void generateOutputFile(const std::string& filename);
 
