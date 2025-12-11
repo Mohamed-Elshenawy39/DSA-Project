@@ -98,6 +98,10 @@ void MarsStation::processPendingRequests()
 
 void MarsStation::runSimulation()
 {
+	int mode = pUI->getMode(); // Get mode (Interactive, Step-by-step, Silent)
+    if (mode == 2) {
+        pUI->printSilent();
+	}
 	loadFromFile("Input.txt");
     while (!ISsimdone())
     {
@@ -131,9 +135,9 @@ void MarsStation::runSimulation()
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
         pUI->printDay(currentDay, this);
-
         
-
+        
+		pUI->waitForEnter();
 
         // STEP 8: Increment current_day
         incrementDay();
