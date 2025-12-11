@@ -307,9 +307,9 @@ LinkedQueue<Missions*>& MarsStation::getReadyComplexMissions()
 void MarsStation::BackToCompletedMissions()
 {
     Missions* pMission;
-    int completionDay; 
+    int completionDay;
 
-    while (backMissions.peek(pMission, completionDay) && -completionDay <= currentDay)
+    while (backMissions.peek(pMission, completionDay) && pMission->getCompletionDay() <= currentDay)
     {
         backMissions.dequeue(pMission, completionDay);
 
@@ -396,7 +396,7 @@ void MarsStation::ExecToBack()
     Missions* pMission;
     int completionDay; // This is the priority from the exec queue
 
-    while (execMissions.peek(pMission, completionDay) && -completionDay <= currentDay)
+    while (execMissions.peek(pMission, completionDay) && (pMission->getCompletionDay() - pMission->getOneWayTravelTime()) <= currentDay)
     {
         // 1. Remove from Exec Queue
         execMissions.dequeue(pMission, completionDay);
@@ -417,14 +417,10 @@ void MarsStation::ExecToBack()
         }
 
         
-        int distance = pMission->getTargetLocation();
-        int returnDays = ceil(distance / (speed *25));
-
-        // 4. Calculate Arrival Day at Station
-        int arrivalDay = currentDay + returnDays;
+		int backTravelDays = pMission->getOneWayTravelTime();
 
         // 5. Move to Back Queue
-        backMissions.enqueue(pMission, -arrivalDay);
+        backMissions.enqueue(pMission, -pMission->getCompletionDay());
     }
 }
 
@@ -434,13 +430,15 @@ void MarsStation::OutToExec()
     int oldPriority; // We won't use this for the execution queue
 
     // Process all missions currently in the 'Out' buffer
-    while (outMissions.dequeue(pMission, oldPriority))
+    while (outMissions.peek(pMission, oldPriority) && (pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getOneWayTravelTime() <= currentDay))
     {
         int executionDays = pMission->getMissionDuration();
 
         int completionDay = currentDay + executionDays;
+        
+        outMissions.dequeue(pMission, oldPriority);
 
-        execMissions.enqueue(pMission, -completionDay);
+        execMissions.enqueue(pMission, -(pMission->getCompletionDay() - pMission->getOneWayTravelTime()));
     }
 }
 
@@ -524,7 +522,7 @@ void MarsStation::assignMissions() //Aty 3 points
                 if (daysTraveled < 0) daysTraveled = 0;
 
                 // Distance to the Failure Point
-                int distToFailure = daysTraveled * failedSpeed;
+                int distToFailure = daysTraveled * 25 * failedSpeed;
 
                 // Distance Remaining to Target
                 int distRemaining = fullDistance - distToFailure;
@@ -611,8 +609,9 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->assignRover(pRover);
             pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
             pMission->setOneWayTravelTime(newOneWayTravel);
-            pMission->setCompletionDay(newCompletionDay);
-			pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
+			
 
             // 3. Move to OUT List
             outMissions.enqueue(pMission, -rescueArrivalDate);
@@ -692,7 +691,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setOneWayTravelTime(oneWay);
             pMission->setTdays(2 * oneWay + pMission->getMissionDuration());
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
-            pMission->setCompletionDay(completion);
+            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
             outMissions.enqueue(pMission, -arrival);
         }
         else
@@ -734,9 +733,10 @@ void MarsStation::assignMissions() //Aty 3 points
             int completionDay = executionEndDay + oneWayTravelTime;
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
-            pMission->setTdays(2*oneWayTravelTime + pMission->getMissionDuration());
-            pMission->setCompletionDay(completionDay);
+            pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
 
             // Move to OUT list (Priority = Arrival Day)
             outMissions.enqueue(pMission, -arrivalAtTargetDay);
@@ -765,7 +765,7 @@ void MarsStation::assignMissions() //Aty 3 points
             pMission->setOneWayTravelTime(oneWayTravelTime);
             pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
-            pMission->setCompletionDay(completionDay);
+            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
 
             outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
@@ -793,12 +793,11 @@ void MarsStation::assignMissions() //Aty 3 points
             int oneWayTravelTime = ceil(pMission->getTargetLocation() / (pRover->getSpeed() * 25));
             int arrivalAtTargetDay = currentDay + oneWayTravelTime;
             int executionEndDay = arrivalAtTargetDay + pMission->getMissionDuration();
-            int completionDay = executionEndDay + oneWayTravelTime;
 
             pMission->setOneWayTravelTime(oneWayTravelTime);
-            pMission->setCompletionDay(completionDay);
             pMission->setTdays(2 * oneWayTravelTime + pMission->getMissionDuration());
             pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
+            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
 
             outMissions.enqueue(pMission, -arrivalAtTargetDay);
         }
