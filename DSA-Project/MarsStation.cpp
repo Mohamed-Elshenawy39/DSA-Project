@@ -418,7 +418,7 @@ void MarsStation::ExecToBack()
 
         
         int distance = pMission->getTargetLocation();
-        int returnDays = ceil(distance / speed);
+        int returnDays = ceil(distance / (speed *25));
 
         // 4. Calculate Arrival Day at Station
         int arrivalDay = currentDay + returnDays;
