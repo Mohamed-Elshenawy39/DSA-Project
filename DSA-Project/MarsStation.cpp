@@ -98,7 +98,7 @@ void MarsStation::processPendingRequests()
 
 void MarsStation::runSimulation()
 {
-	int mode = pUI->getMode(); // Get mode (Interactive, Step-by-step, Silent)
+	int mode = pUI->getMode(); // 1 = Interactive, 2 = Silent
     if (mode == 2) {
         pUI->printSilent();
 	}
@@ -134,19 +134,20 @@ void MarsStation::runSimulation()
 
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
-        pUI->printDay(currentDay, this);
-        
-        
-		pUI->waitForEnter();
+        if (mode == 1) {
+            pUI->printDay(currentDay, this);
+            pUI->waitForEnter();
+		}
 
         // STEP 8: Increment current_day
         incrementDay();
     }
 
     generateOutputFile("Output.txt");
-	cout << "\nOutput file 'Output.txt' generated successfully." << endl;
+	std::cout << "\nOutput file 'Output.txt' generated successfully." << endl;
+    
     // Simulation is over
-    cout << "\nSIMULATION ENDED." << endl;
+    pUI->printEndMessage();
 }
     
 void MarsStation::AutoAbortPolarMissions() { //Shenawy - 1 Point
@@ -875,14 +876,14 @@ void MarsStation::generateOutputFile(const string& filename)
 {
     ofstream OutputFile(filename);
     if (!OutputFile.is_open()) {
-        cout << "Error: Could not open output file." << endl;
+        std::cout << "Error: Could not open output file." << endl;
         return;
     }
 
     OutputFile << "Fday\tID\tRday\tWdays\tMDUR\tTdays\n";
 
     ArrayStack<Missions*>temp = completedMissions;
-    Missions* m;
+    Missions* m; 
     double sumW = 0;
     double sumMDUR = 0;
     double sumT = 0;
