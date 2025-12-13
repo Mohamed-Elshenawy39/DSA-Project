@@ -10,6 +10,9 @@ using namespace std;
 MarsStation::MarsStation() : currentDay(1), maxMissionsBeforeCheckup(0), AutoAbortCount(0) {
     pUI = new UI();
 }
+MarsStation::~MarsStation() {
+    delete pUI;
+}
 
 void MarsStation::loadFromFile(const string& filename)
 {
@@ -128,7 +131,7 @@ void MarsStation::runSimulation()
         }
 
         // STEP 6: Assign RDY missions to rovers
-       // checkMissionFailure();
+        checkMissionFailure();
         assignMissions();
 
         AutoAbortPolarMissions();
@@ -505,7 +508,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int originalFinishDay = pMission->getCompletionDay();
 
             // Calculate Key Days
-            int originalLaunchDay = originalFinishDay - originalDuration - (2 * originalOneWayDays);
+            int originalLaunchDay = pMission->getFormulationDay(); + pMission->getWaitingDays();
             int arrivalAtSiteDay = originalLaunchDay + originalOneWayDays;
             int finishExecDay = arrivalAtSiteDay + originalDuration;
 
@@ -827,10 +830,13 @@ void MarsStation::checkMissionFailure()
 
     while (execMissions.dequeue(pMission, priority))
     {
-        // Generate random number (1-100)
-        int randVal = rand() % 100 + 1;
+        // CHECK IMMUNITY: Rescue and Complex missions cannot fail
+        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX);
 
-        if (randVal <= failureThreshold)
+        int randVal = rand() % 1000 + 1;
+
+        // Condition: Random chance met AND the mission is NOT immune
+        if (randVal <= failureThreshold && !isImmune)
         {
             // Mission Fails! Move to Rescue Queue
             rescueMissions.enqueue(pMission);
@@ -841,6 +847,7 @@ void MarsStation::checkMissionFailure()
             tempExecQueue.enqueue(pMission, priority);
         }
     }
+
     // Restore EXEC missions
     while (tempExecQueue.dequeue(pMission, priority))
     {
@@ -852,10 +859,13 @@ void MarsStation::checkMissionFailure()
 
     while (outMissions.dequeue(pMission, priority))
     {
-        // Generate random number (1-100)
-        int randVal = rand() % 100 + 1;
+        // CHECK IMMUNITY: Rescue and Complex missions cannot fail
+        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX);
 
-        if (randVal <= failureThreshold)
+        int randVal = rand() % 1000 + 1;
+
+        // Condition: Random chance met AND the mission is NOT immune
+        if (randVal <= failureThreshold && !isImmune)
         {
             // Mission Fails! Move to Rescue Queue
             rescueMissions.enqueue(pMission);
