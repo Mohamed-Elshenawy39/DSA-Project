@@ -511,10 +511,10 @@ void MarsStation::assignMissions() //Aty 3 points
             // --- 2. RECONSTRUCT ORIGINAL SCHEDULE ---
             int originalOneWayDays = pMission->getOneWayTravelTime();
             int originalDuration = pMission->getMissionDuration();
-            int originalFinishDay = pMission->getCompletionDay();
 
-            // Calculate Key Days
-            int originalLaunchDay = pMission->getFormulationDay(); + pMission->getWaitingDays();
+            // FIX: Removed extra semicolon
+            int originalLaunchDay = pMission->getFormulationDay() + pMission->getWaitingDays();
+
             int arrivalAtSiteDay = originalLaunchDay + originalOneWayDays;
             int finishExecDay = arrivalAtSiteDay + originalDuration;
 
@@ -522,116 +522,98 @@ void MarsStation::assignMissions() //Aty 3 points
             int failedSpeed = pFailedRover->getSpeed();
             int rescueSpeed = pRover->getSpeed();
 
-            
-            int fullDistance = originalOneWayDays * failedSpeed;
+            // FIX: Multiply by 25 to get the correct total distance
+            int fullDistance = originalOneWayDays * failedSpeed * 25;
 
             int timeRescueTravelsToTarget = 0;
             int timeFailedRoverReturns = 0;
+            int newOneWayTravel = 0;
+            int newCompletionDay = 0;
 
-            int newOneWayTravel = 0;    // For the Rescue Rover's stats
-            int newCompletionDay = 0;   // For the Mission
-
-          
-            if (currentDay <= arrivalAtSiteDay)
+            if (currentDay < arrivalAtSiteDay)
             {
-                // How many days it had traveled
+                // CASE 1: Failure during travel TO site
                 int daysTraveled = currentDay - originalLaunchDay;
                 if (daysTraveled < 0) daysTraveled = 0;
 
-                // Distance to the Failure Point
                 int distToFailure = daysTraveled * 25 * failedSpeed;
-
-                // Distance Remaining to Target
                 int distRemaining = fullDistance - distToFailure;
 
-                // 1. Rescue Rover Travel (Base -> Failure Point)
-                timeRescueTravelsToTarget = ceil(distToFailure / (25 * rescueSpeed));
+                timeRescueTravelsToTarget = ceil(distToFailure / (25.0 * rescueSpeed));
+                timeFailedRoverReturns = ceil(distToFailure / (25.0 * failedSpeed));
 
-                // 2. Failed Rover Return (Failure Point -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(distToFailure / (25 * failedSpeed));
-
-                // 3. New Schedule for Rescue Rover
-                int timeToCompleteTravel = ceil(distRemaining / (25 * rescueSpeed));
+                int timeToCompleteTravel = ceil(distRemaining / (25.0 * rescueSpeed));
                 int durationWork = originalDuration;
-                int timeRescueReturn = ceil(fullDistance / (25 * rescueSpeed));
+                int timeRescueReturn = ceil(fullDistance / (25.0 * rescueSpeed));
 
-                // New Completion = (Arrival at Failure) + (Travel to Target) + (Duration) + (Return)
                 int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
                 newCompletionDay = rescueArrivalDate + timeToCompleteTravel + durationWork + timeRescueReturn;
-
                 newOneWayTravel = timeRescueTravelsToTarget + timeToCompleteTravel;
-            }
-            
 
+                int failedRoverArrivalAtBase = rescueArrivalDate + timeFailedRoverReturns;
+                inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
+
+                pMission->assignRover(pRover);
+                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
+                pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setCompletionDay(newCompletionDay);
+
+                outMissions.enqueue(pMission, -rescueArrivalDate);
+            }
             else if (currentDay <= finishExecDay)
             {
-                // 1. Rescue Rover Travel (Base -> Target)
-                timeRescueTravelsToTarget = ceil(fullDistance / (25 * rescueSpeed));
+                // CASE 2: Failure during EXECUTION
+                timeRescueTravelsToTarget = ceil(fullDistance / (25.0 * rescueSpeed));
+                timeFailedRoverReturns = ceil(fullDistance / (25.0 * failedSpeed));
 
-                // 2. Failed Rover Return (Target -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(fullDistance / (25 * failedSpeed)); // Should equal originalOneWayDays
-
-                // 3. New Schedule
                 int daysWorked = currentDay - arrivalAtSiteDay;
                 int remainingDuration = originalDuration - daysWorked;
                 if (remainingDuration < 0) remainingDuration = 0;
 
-                int timeRescueReturn = ceil(fullDistance / (25*rescueSpeed));
-
+                int timeRescueReturn = ceil(fullDistance / (25.0 * rescueSpeed));
                 int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
                 newCompletionDay = rescueArrivalDate + remainingDuration + timeRescueReturn;
 
                 newOneWayTravel = timeRescueTravelsToTarget;
+                int failedRoverArrivalAtBase = rescueArrivalDate + timeFailedRoverReturns;
+                inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
+
+                pMission->assignRover(pRover);
+                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
+                pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setCompletionDay(newCompletionDay);
+
+                execMissions.enqueue(pMission, -(newCompletionDay - newOneWayTravel));
             }
-            
             else
             {
-               
-                // How many days it has been traveling back
+                // CASE 3: Failure during RETURN
                 int daysReturning = currentDay - finishExecDay;
 
-                // Distance covered on return
-                int distTraveledBack = daysReturning * failedSpeed;
+                // FIX: Multiply by 25 here as well
+                int distTraveledBack = daysReturning * failedSpeed * 25;
 
-                // Distance Remaining to Base (Failure Point -> Base)
                 int distRemainingToBase = fullDistance - distTraveledBack;
                 if (distRemainingToBase < 0) distRemainingToBase = 0;
 
-                // 1. Rescue Rover Travel (Base -> Failure Point)
-                timeRescueTravelsToTarget = ceil(distRemainingToBase / (25 * rescueSpeed));
+                timeRescueTravelsToTarget = ceil(distRemainingToBase / (25.0 * rescueSpeed));
+                timeFailedRoverReturns = ceil(distRemainingToBase / (25.0 * failedSpeed));
 
-                // 2. Failed Rover Return (Failure Point -> Base) using ITS OWN speed
-                timeFailedRoverReturns = ceil(distRemainingToBase / (25 * failedSpeed));
-
-                // 3. New Schedule
-                
                 int timeRescueReturn = timeRescueTravelsToTarget;
-
                 int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
                 newCompletionDay = rescueArrivalDate + timeRescueReturn;
-
                 newOneWayTravel = timeRescueTravelsToTarget;
+
+                int failedRoverArrivalAtBase = rescueArrivalDate + timeFailedRoverReturns;
+                inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
+
+                pMission->assignRover(pRover);
+                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
+                pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setCompletionDay(newCompletionDay);
+
+                backMissions.enqueue(pMission, -newCompletionDay);
             }
-
-            // --- APPLY LOGIC ---
-
-            // 1. Failed Rover Start Time
-            int rescueArrivalDate = currentDay + timeRescueTravelsToTarget;
-            int failedRoverArrivalAtBase = rescueArrivalDate + timeFailedRoverReturns;
-
-            // Enqueue Failed Rover for Checkup
-            inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
-
-            // 2. Update Mission
-            pMission->assignRover(pRover);
-            pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
-            pMission->setOneWayTravelTime(newOneWayTravel);
-            pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
-            pMission->setCompletionDay(pMission->getFormulationDay() + pMission->getWaitingDays() + pMission->getTdays());
-			
-
-            // 3. Move to OUT List
-            outMissions.enqueue(pMission, -rescueArrivalDate);
         }
         else
         {
@@ -827,7 +809,7 @@ void MarsStation::assignMissions() //Aty 3 points
 
 void MarsStation::checkMissionFailure()
 {
-    int failureThreshold = 5; // 5% chance
+    int failureThreshold = 5; // 0.5% chance (5 out of 1000)
     Missions* pMission;
     int priority;
 
@@ -836,12 +818,16 @@ void MarsStation::checkMissionFailure()
 
     while (execMissions.dequeue(pMission, priority))
     {
-        // CHECK IMMUNITY: Rescue and Complex missions cannot fail
-        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX);
+        // 1. Get the assigned rover
+        Rovers* pRover = pMission->getAssignedRover();
+
+        // 2. Check if it is a Rescue Rover
+        bool isRescueRover = (pRover != nullptr && pRover->getType() == ROVER_RESCUE);
+
+        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX || isRescueRover);
 
         int randVal = rand() % 1000 + 1;
 
-        // Condition: Random chance met AND the mission is NOT immune
         if (randVal <= failureThreshold && !isImmune)
         {
             // Mission Fails! Move to Rescue Queue
@@ -865,12 +851,16 @@ void MarsStation::checkMissionFailure()
 
     while (outMissions.dequeue(pMission, priority))
     {
-        // CHECK IMMUNITY: Rescue and Complex missions cannot fail
-        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX);
+        // 1. Get the assigned rover
+        Rovers* pRover = pMission->getAssignedRover();
+
+        // 2. Check if it is a Rescue Rover
+        bool isRescueRover = (pRover != nullptr && pRover->getType() == ROVER_RESCUE);
+
+        bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX || isRescueRover);
 
         int randVal = rand() % 1000 + 1;
 
-        // Condition: Random chance met AND the mission is NOT immune
         if (randVal <= failureThreshold && !isImmune)
         {
             // Mission Fails! Move to Rescue Queue
