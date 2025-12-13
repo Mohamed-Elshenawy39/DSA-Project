@@ -809,11 +809,10 @@ void MarsStation::assignMissions() //Aty 3 points
 
 void MarsStation::checkMissionFailure()
 {
-    int failureThreshold = 5; // 0.5% chance (5 out of 1000)
+    int failureThreshold = 5; 
     Missions* pMission;
     int priority;
 
-    // === 1. CHECK EXEC MISSIONS ===
     priQueue<Missions*> tempExecQueue;
 
     while (execMissions.dequeue(pMission, priority))
@@ -835,26 +834,21 @@ void MarsStation::checkMissionFailure()
         }
         else
         {
-            // Mission Survives, put back in temp queue
             tempExecQueue.enqueue(pMission, priority);
         }
     }
 
-    // Restore EXEC missions
     while (tempExecQueue.dequeue(pMission, priority))
     {
         execMissions.enqueue(pMission, priority);
     }
 
-    // === 2. CHECK OUT MISSIONS ===
     priQueue<Missions*> tempOutQueue;
 
     while (outMissions.dequeue(pMission, priority))
     {
-        // 1. Get the assigned rover
         Rovers* pRover = pMission->getAssignedRover();
 
-        // 2. Check if it is a Rescue Rover
         bool isRescueRover = (pRover != nullptr && pRover->getType() == ROVER_RESCUE);
 
         bool isImmune = (pMission->getType() == MISSION_RESCUE || pMission->getType() == MISSION_COMPLEX || isRescueRover);
@@ -868,7 +862,6 @@ void MarsStation::checkMissionFailure()
         }
         else
         {
-            // Mission Survives, put back in temp queue
             tempOutQueue.enqueue(pMission, priority);
         }
     }
