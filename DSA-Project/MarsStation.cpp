@@ -112,7 +112,6 @@ void MarsStation::runSimulation()
         // (Your Step 2 logic)
         CheckupToAvailable();
        
-        // CheckupToAvailable(...); // Or however you implemented it
 
         // STEP 3: Pick one mission from BACK to DONE
         if (!backMissions.isEmpty()) {
@@ -131,6 +130,8 @@ void MarsStation::runSimulation()
         // STEP 6: Assign RDY missions to rovers
        // checkMissionFailure();
         assignMissions();
+
+        AutoAbortPolarMissions();
 
         // STEP 7: Print ALL applicable info (UI logic)
         // (UI print calls go here)
@@ -165,6 +166,7 @@ void MarsStation::AutoAbortPolarMissions() { //Shenawy - 1 Point
         if (waitingDays > abortThreshold) {
             // Abort condition met
             abortedMissions.enqueue(pMis);
+            AutoAbortCount++;
         }
         else {
             // Condition not met, mission is safe, put in temp queue
@@ -892,7 +894,7 @@ void MarsStation::generateOutputFile(const string& filename)
     int doneP = 0;
     int doneD = 0;
     int doneC = 0;
-    int abortedCount = abortedMissions.getCount();
+    double abortedCount = abortedMissions.getCount();
     int countNR = availableNormalRovers.getCount();
     int countPR = availablePolarRovers.getCount();
     int countDR = availableDiggingRovers.getCount();
