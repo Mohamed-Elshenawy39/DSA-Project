@@ -14,13 +14,13 @@ MarsStation::~MarsStation() {
     delete pUI;
 }
 
-void MarsStation::loadFromFile(const string& filename)
+bool MarsStation::loadFromFile(const string& filename)
 {
     // Create an ifstream object
     ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         std::cout << "Error: Could not open input file. Terminating." << std::endl;
-        return;
+        return false;
     }
 
     int numDR, numPR, numNR, numRR; // RR for Rescue Rovers
@@ -86,6 +86,7 @@ void MarsStation::loadFromFile(const string& filename)
     }
 
     inputFile.close();
+    return true;
 }
 
 void MarsStation::processPendingRequests()
@@ -101,11 +102,17 @@ void MarsStation::processPendingRequests()
 
 void MarsStation::runSimulation()
 {
-	int mode = pUI->getMode(); // 1 = Interactive, 2 = Silent
+    string in = pUI->getInFile();
+
+    if (!loadFromFile(in)) return;
+
+    string out = pUI->getOutFile();
+
+
+    int mode = pUI->getMode(); // 1 = Interactive, 2 = Silent
     if (mode == 2) {
         pUI->printSilent();
-	}
-	loadFromFile("Input.txt");
+    }
     while (!ISsimdone())
     {
         // STEP 1: Process new requests scheduled for today
@@ -114,7 +121,7 @@ void MarsStation::runSimulation()
         // STEP 2: Move rover from Checkup to Available
         // (Your Step 2 logic)
         CheckupToAvailable();
-       
+
 
         // STEP 3: Pick one mission from BACK to DONE
         if (!backMissions.isEmpty()) {
@@ -132,6 +139,7 @@ void MarsStation::runSimulation()
 
         // STEP 6: Assign RDY missions to rovers
         checkMissionFailure();
+
         assignMissions();
 
         AutoAbortPolarMissions();
@@ -141,15 +149,13 @@ void MarsStation::runSimulation()
         if (mode == 1) {
             pUI->printDay(currentDay, this);
             pUI->waitForEnter();
-		}
+        }
 
         // STEP 8: Increment current_day
         incrementDay();
     }
-
-    generateOutputFile("Output.txt");
-	std::cout << "\nOutput file 'Output.txt' generated successfully." << endl;
-    
+    generateOutputFile(out);
+    std::cout << "\nOutput file 'Output.txt' generated successfully." << endl;
     // Simulation is over
     pUI->printEndMessage();
 }

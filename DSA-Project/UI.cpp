@@ -194,9 +194,5 @@ void UI::waitForEnter() const
 {
 	cout << "Press Enter to continue to next day...";
 
-	if (cin.peek() == '\n') {
-		cin.ignore();
-	}
-
 	cin.get();
 }
