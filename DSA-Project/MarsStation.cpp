@@ -138,7 +138,8 @@ void MarsStation::runSimulation()
         }
 
         // STEP 6: Assign RDY missions to rovers
-       // checkMissionFailure();
+        checkMissionFailure();
+
         assignMissions();
 
         AutoAbortPolarMissions();
@@ -153,32 +154,10 @@ void MarsStation::runSimulation()
         // STEP 8: Increment current_day
         incrementDay();
     }
-
-    // STEP 5: Pick 1 mission from OUT to EXEC
-    if (!outMissions.isEmpty()) {
-        OutToExec();
-    }
-
-    // STEP 6: Assign RDY missions to rovers
-    checkMissionFailure();
-    assignMissions();
-
-    AutoAbortPolarMissions();
-
-    // STEP 7: Print ALL applicable info (UI logic)
-    // (UI print calls go here)
-    if (mode == 1) {
-        pUI->printDay(currentDay, this);
-        pUI->waitForEnter();
-    }
-
-    // STEP 8: Increment current_day
-    incrementDay();
     generateOutputFile(out);
     std::cout << "\nOutput file 'Output.txt' generated successfully." << endl;
     // Simulation is over
     pUI->printEndMessage();
-
 }
     
 void MarsStation::AutoAbortPolarMissions() { //Shenawy - 1 Point
