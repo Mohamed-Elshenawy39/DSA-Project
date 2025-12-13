@@ -54,7 +54,7 @@ private:
     LinkedQueue<Missions*> abortedMissions;
 
     // --- Private Helper Functions ---
-    void loadFromFile(const string& filename);
+    bool loadFromFile(const string& filename);
     void processPendingRequests();
 
     void assignMissions();
