@@ -642,17 +642,23 @@ void MarsStation::assignMissions() //Aty 3 points
         // --- Step B: Get Extra Rovers (if needed) ---
         if (possible && roversNeeded > 1)
         {
-            // Lambda to pick any available rover (excluding Rescue)
-            auto getExtraRover = [&]() -> Rovers* {
+            
+            for (int i = 1; i < roversNeeded; ++i)
+            {
                 Rovers* r = nullptr;
-                if (!availableNormalRovers.isEmpty()) availableNormalRovers.dequeue(r);
-                else if (!availablePolarRovers.isEmpty()) availablePolarRovers.dequeue(r);
-                else if (!availableDiggingRovers.isEmpty()) availableDiggingRovers.dequeue(r);
-                return r;
-                };
 
-            for (int i = 1; i < roversNeeded; ++i) {
-                gatheredRovers[i] = getExtraRover();
+                if (!availableNormalRovers.isEmpty()) {
+                    availableNormalRovers.dequeue(r);
+                }
+                else if (!availablePolarRovers.isEmpty()) {
+                    availablePolarRovers.dequeue(r);
+                }
+                else if (!availableDiggingRovers.isEmpty()) {
+                    availableDiggingRovers.dequeue(r);
+                }
+
+                gatheredRovers[i] = r;
+
                 if (gatheredRovers[i] == nullptr) {
                     possible = false; // Not enough extras available
                     break;
@@ -663,10 +669,8 @@ void MarsStation::assignMissions() //Aty 3 points
         // --- Step C: Finalize or Rollback ---
         if (possible)
         {
-            // SUCCESS: We have all required rovers
             readyComplexMissions.dequeue(pMission);
 
-            // Assign Leader
             pMission->assignRover(gatheredRovers[0]);
 
             // Assign Extras
