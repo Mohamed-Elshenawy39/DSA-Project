@@ -155,7 +155,7 @@ void MarsStation::runSimulation()
         incrementDay();
     }
     generateOutputFile(out);
-    std::cout << "\nOutput file 'Output.txt' generated successfully." << endl;
+    cout << "\nOutput file 'Output.txt' generated successfully." << endl;
     // Simulation is over
     pUI->printEndMessage();
 }
@@ -505,14 +505,11 @@ void MarsStation::assignMissions() //Aty 3 points
         {
             rescueMissions.dequeue(pMission);
 
-            // --- 1. RETRIEVE FAILED ROVER ---
             Rovers* pFailedRover = pMission->getAssignedRover();
 
-            // --- 2. RECONSTRUCT ORIGINAL SCHEDULE ---
             int originalOneWayDays = pMission->getOneWayTravelTime();
             int originalDuration = pMission->getMissionDuration();
 
-            // FIX: Removed extra semicolon
             int originalLaunchDay = pMission->getFormulationDay() + pMission->getWaitingDays();
 
             int arrivalAtSiteDay = originalLaunchDay + originalOneWayDays;
@@ -522,7 +519,6 @@ void MarsStation::assignMissions() //Aty 3 points
             int failedSpeed = pFailedRover->getSpeed();
             int rescueSpeed = pRover->getSpeed();
 
-            // FIX: Multiply by 25 to get the correct total distance
             int fullDistance = originalOneWayDays * failedSpeed * 25;
 
             int timeRescueTravelsToTarget = 0;
@@ -724,7 +720,6 @@ void MarsStation::assignMissions() //Aty 3 points
         else if (!availableDiggingRovers.isEmpty())
             availableDiggingRovers.dequeue(pRover);
 
-        // assign it
         if (pRover)
         {
             readyPolarMissions.dequeue(pMission);
