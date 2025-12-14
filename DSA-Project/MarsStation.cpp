@@ -159,7 +159,7 @@ void MarsStation::runSimulation()
     // Simulation is over
     pUI->printEndMessage();
 }
-    
+
 void MarsStation::AutoAbortPolarMissions() { //Shenawy - 1 Point
 
     LinkedQueue<Missions*> tempQueue;
@@ -241,58 +241,58 @@ void MarsStation::abortMission(int missionID) //Sheno - 4 Points
 
 
 
-LinkedQueue<Missions*>& MarsStation::getReadyPolarMissions() 
+LinkedQueue<Missions*>& MarsStation::getReadyPolarMissions()
 {
-	return readyPolarMissions ;  
+    return readyPolarMissions;
 }
 
 ReadyNormalMissionsQueue& MarsStation::getReadyNormalMissions()
 {
-	return readyNormalMissions;
+    return readyNormalMissions;
 }
 LinkedQueue<Missions*>& MarsStation::getReadyDiggingMissions()
 {
-	return readyDiggingMissions;
+    return readyDiggingMissions;
 }
 
 OutMissionsPriQueue& MarsStation::getOutMissions()
 {
-	return outMissions;
+    return outMissions;
 }
 
 priQueue<Missions*>& MarsStation::getExecMissions()
 {
-	return execMissions;
+    return execMissions;
 }
 
 priQueue<Missions*>& MarsStation::getBackMissions()
 {
-	return backMissions;
+    return backMissions;
 }
 
 LinkedQueue<Rovers*>& MarsStation::getAvailablePolarRovers()
 {
-	return availablePolarRovers;
+    return availablePolarRovers;
 }
 
 LinkedQueue<Rovers*>& MarsStation::getAvailableNormalRovers()
 {
-	return availableNormalRovers;
+    return availableNormalRovers;
 }
 
 LinkedQueue<Rovers*>& MarsStation::getAvailableDiggingRovers()
 {
-	return availableDiggingRovers;
+    return availableDiggingRovers;
 }
 
 priQueue<Rovers*>& MarsStation::getInCheckupRovers()
 {
-	return inCheckupRovers;
+    return inCheckupRovers;
 }
 
 ArrayStack<Missions*>& MarsStation::getCompletedMissions()
 {
-	return completedMissions;
+    return completedMissions;
 }
 
 LinkedQueue<Missions*>& MarsStation::getAbortedMissions()
@@ -335,8 +335,8 @@ void MarsStation::BackToCompletedMissions()
         Rovers* pRover = pMission->getAssignedRover();
         pRover->incrementMissionsCompleted();
 
-       
-       
+
+
         if (pMission->getType() == MISSION_COMPLEX)
         {
             int restDays = 3; // Fixed rest period
@@ -380,14 +380,14 @@ void MarsStation::BackToCompletedMissions()
 
 void MarsStation::AddRoverToCheckup(Rovers* rover)
 {
-	inCheckupRovers.enqueue(rover, -(currentDay + rover->getCheckupDuration()));
+    inCheckupRovers.enqueue(rover, -(currentDay + rover->getCheckupDuration()));
 }
 
 void MarsStation::AddRoverToAvailable(Rovers* rover)
 {
     RoverType Type = rover->getType();
 
-    if (Type== ROVER_POLAR)
+    if (Type == ROVER_POLAR)
     {
         availablePolarRovers.enqueue(rover);
     };
@@ -402,7 +402,7 @@ void MarsStation::AddRoverToAvailable(Rovers* rover)
     if (Type == ROVER_RESCUE)
     {
         availableRescueRovers.enqueue(rover);
-	};
+    };
 
 
 }
@@ -433,8 +433,8 @@ void MarsStation::ExecToBack()
             }
         }
 
-        
-		int backTravelDays = pMission->getOneWayTravelTime();
+
+        int backTravelDays = pMission->getOneWayTravelTime();
 
         // 5. Move to Back Queue
         backMissions.enqueue(pMission, -pMission->getCompletionDay());
@@ -452,7 +452,7 @@ void MarsStation::OutToExec()
         int executionDays = pMission->getMissionDuration();
 
         int completionDay = currentDay + executionDays;
-        
+
         outMissions.dequeue(pMission, oldPriority);
 
         execMissions.enqueue(pMission, -(pMission->getCompletionDay() - pMission->getOneWayTravelTime()));
@@ -474,11 +474,11 @@ void MarsStation::CheckupToAvailable() //Shenawy-2 Points
 
 void MarsStation::incrementDay()
 {
-	currentDay++;
+    currentDay++;
 }
 
 bool MarsStation::ISsimdone() const {
-    
+
     return pendingRequests.isEmpty() &&
         readyPolarMissions.isEmpty() &&
         readyNormalMissions.getCount() == 0 &&
@@ -526,7 +526,7 @@ void MarsStation::assignMissions() //Aty 3 points
             int newOneWayTravel = 0;
             int newCompletionDay = 0;
 
-            if (currentDay < arrivalAtSiteDay)
+            if (currentDay <= arrivalAtSiteDay)
             {
                 // CASE 1: Failure during travel TO site
                 int daysTraveled = currentDay - originalLaunchDay;
@@ -550,8 +550,9 @@ void MarsStation::assignMissions() //Aty 3 points
                 inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
 
                 pMission->assignRover(pRover);
-                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
                 pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setTdays(newOneWayTravel + durationWork + timeRescueReturn);
+                pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
                 pMission->setCompletionDay(newCompletionDay);
 
                 outMissions.enqueue(pMission, -rescueArrivalDate);
@@ -575,8 +576,9 @@ void MarsStation::assignMissions() //Aty 3 points
                 inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
 
                 pMission->assignRover(pRover);
-                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
                 pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setTdays(newOneWayTravel + remainingDuration + timeRescueReturn);
+                pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
                 pMission->setCompletionDay(newCompletionDay);
 
                 execMissions.enqueue(pMission, -(newCompletionDay - newOneWayTravel));
@@ -604,10 +606,10 @@ void MarsStation::assignMissions() //Aty 3 points
                 inCheckupRovers.enqueue(pFailedRover, -failedRoverArrivalAtBase);
 
                 pMission->assignRover(pRover);
-                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
                 pMission->setOneWayTravelTime(newOneWayTravel);
+                pMission->setTdays(2 * newOneWayTravel + pMission->getMissionDuration());
                 pMission->setCompletionDay(newCompletionDay);
-
+                pMission->setWaitingDays(currentDay - pMission->getFormulationDay());
                 backMissions.enqueue(pMission, -newCompletionDay);
             }
         }
@@ -638,7 +640,7 @@ void MarsStation::assignMissions() //Aty 3 points
         // --- Step B: Get Extra Rovers (if needed) ---
         if (possible && roversNeeded > 1)
         {
-            
+
             for (int i = 1; i < roversNeeded; ++i)
             {
                 Rovers* r = nullptr;
@@ -773,7 +775,7 @@ void MarsStation::assignMissions() //Aty 3 points
         }
     }
 
- 
+
     while (!readyNormalMissions.isEmpty())
     {
         pRover = nullptr;
@@ -808,7 +810,7 @@ void MarsStation::assignMissions() //Aty 3 points
 
 void MarsStation::checkMissionFailure()
 {
-    int failureThreshold = 5; 
+    int failureThreshold = 5;
     Missions* pMission;
     int priority;
 
@@ -883,7 +885,7 @@ void MarsStation::generateOutputFile(const string& filename)
     OutputFile << "Fday\tID\tRday\tWdays\tMDUR\tTdays\n";
 
     ArrayStack<Missions*>temp = completedMissions;
-    Missions* m; 
+    Missions* m;
     double sumW = 0;
     double sumMDUR = 0;
     double sumT = 0;
